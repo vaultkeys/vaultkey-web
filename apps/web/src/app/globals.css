@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  .light {
+    --background: 220 2% 96%;
+    --foreground: 234 16% 35%;
+    --card: 0 0% 100%;
+    --card-foreground: 234 16% 35%;
+    --popover: 220 2% 96%;
+    --popover-foreground: 234 16% 35%;
+    --primary: 167 34% 20%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 240 11% 88%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 240 11% 88%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 347 62% 55%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 21% 89%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 167 34% 20%;
+    --radius: 0.5rem;
+    --sidebar-background: 225 3% 94%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-accent: 240 11% 88%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 11% 88%;
+    --green: 109 58% 40%;
+    --red: 347 87% 44%;
+    --blue: 197 97% 46%;
+    --yellow: 35 77% 49%;
+    --primary-light: 183 74% 35%;
+  }
+
+  .dark {
+    --background: 240 21% 12%;
+    --foreground: 226 64% 88%;
+    --card: 240 21% 10%;
+    --card-foreground: 226 64% 88%;
+    --popover: 240 21% 15%;
+    --popover-foreground: 226 64% 88%;
+    --primary: 167 64% 94%;
+    --primary-foreground: 240 23% 9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 237 16% 23%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 237 16% 23%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 343 81% 75%;
+    --destructive-foreground: 240 21% 15%;
+    --border: 237 16% 23%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 167 64% 94%;
+    --sidebar-background: 240 23% 9%;
+    --sidebar-foreground: 226 64% 88%;
+    --sidebar-accent: 237 17% 20%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 21% 15%;
+    --green: 115 54% 76%;
+    --red: 343 81% 75%;
+    --blue: 212 96% 78%;
+    --yellow: 41 86% 83%;
+    --primary-light: 170 57% 73%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground h-full; }
+  html { @apply h-full; }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+.shiki, .shiki span { font-style: normal !important; }
+.dark .shiki, .dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}

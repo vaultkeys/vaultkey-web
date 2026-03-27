@@ -23,7 +23,6 @@
     "@types/node": "^22.15.2",
     "@types/react": "^19.1.2",
     "@vaultkey/eslint-config": "workspace:*",
-    "@vaultkey/lib": "workspace:*",
     "@vaultkey/typescript-config": "workspace:*",
     "openapi-typescript": "^7.6.1",
     "tsup": "^8.4.0",

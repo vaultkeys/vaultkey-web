@@ -1,5 +1,5 @@
 {
-  "name": "@usesend/email-editor",
+  "name": "@vaultkey/email-editor",
   "version": "0.0.1",
   "description": "Email editor used by unsend",
   "main": "./src/index.ts",
@@ -20,10 +20,10 @@
   "devDependencies": {
     "@types/eslint": "^9.6.1",
     "@types/react": "^19.1.2",
-    "@usesend/eslint-config": "workspace:*",
-    "@usesend/tailwind-config": "workspace:*",
-    "@usesend/typescript-config": "workspace:*",
-    "@usesend/ui": "workspace:*",
+    "@vaultkey/eslint-config": "workspace:*",
+    "@vaultkey/tailwind-config": "workspace:*",
+    "@vaultkey/typescript-config": "workspace:*",
+    "@vaultkey/ui": "workspace:*",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
