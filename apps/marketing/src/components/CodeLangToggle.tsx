@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 
 type LangItem = {
   key: string;

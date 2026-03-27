@@ -3,7 +3,7 @@ import "@usesend/ui/styles/globals.css";
 import { Inter } from "next/font/google";
 import { JetBrains_Mono } from "next/font/google";
 import type { Metadata } from "next";
-import { ThemeProvider } from "@usesend/ui";
+import { ThemeProvider } from "@vaultkey/ui";
 import Script from "next/script";
 
 const inter = Inter({

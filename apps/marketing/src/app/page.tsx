@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter } from "~/components/SiteFooter";
 import { GitHubStarsButton } from "~/components/GitHubStarsButton";
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 import { TopNav } from "~/components/TopNav";
 import { FeatureCard } from "~/components/FeatureCard";
 import { FeatureCardPlain } from "~/components/FeatureCardPlain";
 import { PricingCalculator } from "~/components/PricingCalculator";
 import CodeExample from "~/components/CodeExample";
-import { Avatar, AvatarFallback, AvatarImage } from "@usesend/ui/src/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@vaultkey/ui/src/avatar";
 
 const REPO = "usesend/usesend";
 const REPO_URL = `https://github.com/${REPO}`;

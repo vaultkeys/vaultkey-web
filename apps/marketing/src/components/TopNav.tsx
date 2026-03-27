@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 
 const REPO = "usesend/usesend";
 const REPO_URL = `https://github.com/${REPO}`;

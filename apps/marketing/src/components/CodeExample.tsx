@@ -1,9 +1,9 @@
-import { Button } from "@usesend/ui/src/button";
-import { CodeBlock } from "@usesend/ui/src/code-block";
-import { CodeBlockWithCopy } from "@usesend/ui/src/code-block-with-copy";
+import { Button } from "@vaultkey/ui/src/button";
+import { CodeBlock } from "@vaultkey/ui/src/code-block";
+import { CodeBlockWithCopy } from "@vaultkey/ui/src/code-block-with-copy";
 import { LangToggle } from "./CodeLangToggle";
 
-const TS_CODE = `import { UseSend } from "usesend-js";
+const TS_CODE = `import { UseSend } from "vaultkey-js";
 
 const usesend = new UseSend("us_12345");
 

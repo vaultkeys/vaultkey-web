@@ -1,4 +1,4 @@
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 
 const REPO = "usesend/usesend";
 const REPO_URL = `https://github.com/${REPO}`;
