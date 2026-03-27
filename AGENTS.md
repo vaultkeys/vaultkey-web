@@ -5,7 +5,6 @@
 - apps/web: Next.js app (primary product). Uses Prisma, TRPC, Tailwind.
 - apps/marketing: Public marketing site (Next.js, static export).
 - apps/docs: Mintlify docs content.
-- apps/smtp-server: SMTP proxy/server (TypeScript → tsup build).
 - packages/\*: Shared libraries (email-editor, ui, eslint-config, tailwind-config, typescript-config, sdk).
 - docker/: Dev/compose files; .env\* at repo root define configuration.
 
@@ -16,8 +15,6 @@
 - `pnpm start:web:local`: Run only `apps/web` locally on port 3000.
 - `pnpm build`: Turbo build across the monorepo.
 - `pnpm dx` / `pnpm dx:up` / `pnpm dx:down`: Spin up/down local infra via Docker Compose, then run migrations.
-- Database (apps/web filter): `pnpm db:generate` | `db:migrate-dev` | `db:push` | `db:studio`.
-- Never run migrations unless users explicitly asked
 
 ## Coding Style & Naming Conventions
 
