@@ -1,13 +1,13 @@
 {
-  "name": "usesend",
+  "name": "vaultkey",
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "build:editor": "turbo build --filter=@usesend/email-editor",
-    "build:web": "turbo build --filter=@usesend/email-editor  --filter=web ",
-    "build:marketing": "turbo build --filter=@usesend/email-editor --filter=marketing",
+    "build:editor": "turbo build --filter=@vaultkey/email-editor",
+    "build:web": "turbo build --filter=@vaultkey/email-editor  --filter=web ",
+    "build:marketing": "turbo build --filter=@vaultkey/email-editor --filter=marketing",
     "build:smtp": "turbo build --filter=smtp-server",
-    "build:web:local": "pnpm load-env -- turbo build --filter=@usesend/email-editor  --filter=web ",
+    "build:web:local": "pnpm load-env -- turbo build --filter=@vaultkey/email-editor  --filter=web ",
     "start:web:local": "pnpm load-env -- cd apps/web && pnpm start",
     "dev": "pnpm load-env -- turbo dev",
     "test:web": "pnpm --filter=web test",
@@ -24,13 +24,6 @@
     "dev:marketing": "cd apps/marketing && turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "db:generate": "pnpm db db:generate",
-    "db:push": "pnpm db db:push",
-    "db:migrate-dev": "pnpm db db:migrate-dev",
-    "db:migrate-deploy": "pnpm db db:migrate-deploy",
-    "db:migrate-reset": "pnpm db db:migrate-reset",
-    "db:studio": "pnpm db db:studio",
-    "db": "pnpm load-env -- pnpm --filter=web",
     "load-env": "dotenv -e .env",
     "d": "pnpm dx && pnpm dev",
     "dx": "pnpm i && pnpm dx:up && pnpm db:migrate-dev",
@@ -38,8 +31,8 @@
     "dx:down": "docker compose -f docker/dev/compose.yml down"
   },
   "devDependencies": {
-    "@usesend/eslint-config": "workspace:*",
-    "@usesend/typescript-config": "workspace:*",
+    "@vaultkey/eslint-config": "workspace:*",
+    "@vaultkey/typescript-config": "workspace:*",
     "dotenv-cli": "^8.0.0",
     "mintlify": "latest",
     "prettier": "^3.5.3"
