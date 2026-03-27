@@ -1,5 +1,5 @@
 {
-  "name": "usesend-js",
+  "name": "vaultkey-js",
   "version": "1.6.3",
   "description": "",
   "repository": {
@@ -22,9 +22,9 @@
   "devDependencies": {
     "@types/node": "^22.15.2",
     "@types/react": "^19.1.2",
-    "@usesend/eslint-config": "workspace:*",
-    "@usesend/lib": "workspace:*",
-    "@usesend/typescript-config": "workspace:*",
+    "@vaultkey/eslint-config": "workspace:*",
+    "@vaultkey/lib": "workspace:*",
+    "@vaultkey/typescript-config": "workspace:*",
     "openapi-typescript": "^7.6.1",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
