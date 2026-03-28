@@ -2,8 +2,6 @@
   "extends": "@vaultkey/typescript-config/nextjs.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
