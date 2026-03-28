@@ -24,7 +24,7 @@ export default function TransfersPage() {
   const [chainId, setChainId] = useState("137");
   const [gasless, setGasless] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Result>(null);
+  const [result, setResult] = useState<TransferResult>(null);
 
   // Balance check
   const [balanceLoading, setBalanceLoading] = useState(false);

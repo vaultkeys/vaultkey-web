@@ -135,7 +135,11 @@ export default function ApiKeysPage() {
       {showCreate && (
         <CreateKeyModal
           onClose={() => setShowCreate(false)}
-          onCreated={(k) => { setJustCreated(k); setKeys((p) => [k, ...p]); setShowCreate(false); }}
+          onCreated={(k) => { 
+            setJustCreated(k); 
+            setKeys((p) => [{ ...k, active: true }, ...p]); 
+            setShowCreate(false); 
+          }}
           orgId={orgId!}
         />
       )}

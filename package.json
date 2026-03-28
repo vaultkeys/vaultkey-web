@@ -3,11 +3,8 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "build:editor": "turbo build --filter=@vaultkey/email-editor",
-    "build:web": "turbo build --filter=@vaultkey/email-editor  --filter=web ",
-    "build:marketing": "turbo build --filter=@vaultkey/email-editor --filter=marketing",
-    "build:smtp": "turbo build --filter=smtp-server",
-    "build:web:local": "pnpm load-env -- turbo build --filter=@vaultkey/email-editor  --filter=web ",
+    "build:web": "turbo build  --filter=web ",
+    "build:marketing": "turbo build --filter=marketing",
     "start:web:local": "pnpm load-env -- cd apps/web && pnpm start",
     "dev": "pnpm load-env -- turbo dev",
     "test:web": "pnpm --filter=web test",
