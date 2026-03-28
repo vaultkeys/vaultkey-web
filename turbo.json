@@ -19,7 +19,8 @@
         "VERCEL_URL",
         "VERCEL",
         "SKIP_ENV_VALIDATION",
-        "PORT"
+        "PORT",
+        "GITHUB_TOKEN"
       ]
     },
     "lint": {
