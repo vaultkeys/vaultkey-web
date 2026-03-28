@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { Plus, UserMinus, Mail, X } from "lucide-react";
+import { Plus, UserMinus, Mail, X, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
-import { cloud, type Member, type Invite } from "@/lib/api";
+import { type Member, type Invite } from "@/lib/api";
 import { useOrg } from "@/hooks/useOrg";
+import { useEnv } from "@/hooks/useEnv";
+import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RoleBadge } from "@/components/shared/RoleBadge";
@@ -17,6 +19,8 @@ export default function TeamPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const { orgId } = useOrg();
+  const { isTestnet } = useEnv();
+  const { cloud } = useApi();
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +42,7 @@ export default function TeamPage() {
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, [orgId]);
+  useEffect(() => { setMembers([]); setInvites([]); setLoading(true); load(); }, [orgId]);
 
   const removeMember = async (clerkUserId: string, name: string) => {
     if (!confirm(`Remove ${name} from the organization?`)) return;
@@ -90,6 +94,19 @@ export default function TeamPage() {
           )
         }
       />
+
+      {/* Testnet isolation notice */}
+      {isTestnet && (
+        <div className="mb-6 rounded-lg border border-yellow-500/25 bg-yellow-500/8 px-4 py-3 flex items-start gap-2.5">
+          <FlaskConical className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Testnet team is separate from mainnet</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Members invited here won't automatically appear on mainnet. Switch to mainnet to manage your production team.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Members */}
       <div className="mb-8">
@@ -203,6 +220,7 @@ export default function TeamPage() {
 
 function InviteModal({ onClose, onInvited, orgId }: { onClose: () => void; onInvited: (i: Invite) => void; orgId: string }) {
   const { getToken } = useAuth();
+  const { cloud } = useApi();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "developer" | "viewer">("developer");
   const [loading, setLoading] = useState(false);

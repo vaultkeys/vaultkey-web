@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import {
@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/hooks/useOrg";
+import { useEnv } from "@/hooks/useEnv";
+import { EnvSwitcher } from "@/components/layout/EnvSwitcher";
 
 const nav = [
   { label: "Dashboard",   href: "/dashboard",    icon: LayoutDashboard },
@@ -25,17 +27,34 @@ const nav = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useUser();
-  const { org } = useOrg();
+  const { org, needsOnboarding, loading: orgLoading } = useOrg();
   const { theme, setTheme } = useTheme();
+  const { isTestnet } = useEnv();
+  const router = useRouter();
+
+  // Redirect to onboarding when the user has no org in the current environment
+  // and loading has settled — avoids a flash on initial load.
+  if (!orgLoading && needsOnboarding && !pathname.startsWith("/onboarding")) {
+    router.replace("/onboarding");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 flex flex-col border-r border-border bg-sidebar-background">
+      <aside className={cn(
+        "w-56 shrink-0 flex flex-col border-r border-border",
+        isTestnet ? "bg-[hsl(var(--sidebar-background))]" : "bg-sidebar-background",
+      )}>
         {/* Logo */}
         <div className="h-14 flex items-center gap-2.5 px-4 border-b border-sidebar-border">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-xs font-mono">VK</span>
+          <div className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+            isTestnet ? "bg-yellow-500/20 border border-yellow-500/30" : "bg-primary",
+          )}>
+            <span className={cn(
+              "font-bold text-xs font-mono",
+              isTestnet ? "text-yellow-600 dark:text-yellow-400" : "text-primary-foreground",
+            )}>VK</span>
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-none truncate">VaultKey</p>
@@ -48,6 +67,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Nav */}
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto no-scrollbar">
           {nav.map(({ label, href, icon: Icon }) => {
+            // Hide billing in testnet — no purchase flow
+            if (isTestnet && href === "/billing") return null;
+
             const active = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
@@ -68,7 +90,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Admin link — always shown, stub page for now */}
+        {/* Environment switcher */}
+        <EnvSwitcher />
+
+        {/* Admin link */}
         <div className="px-2 pb-2 border-t border-sidebar-border pt-2">
           <Link
             href="/admin"
@@ -102,6 +127,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <main className="flex-1 overflow-y-auto">
+        {/* Testnet top bar */}
+        {isTestnet && (
+          <div className="sticky top-0 z-10 flex items-center justify-center gap-2 bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-1.5 text-xs font-medium text-yellow-600 dark:text-yellow-400">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+            Testnet — data is isolated and not connected to mainnet
+          </div>
+        )}
         {children}
       </main>
     </div>

@@ -1,5 +1,3 @@
-const BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
-
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -7,7 +5,11 @@ export class ApiError extends Error {
   }
 }
 
-async function req<T>(path: string, opts: RequestInit & { token?: string } = {}): Promise<T> {
+async function req<T>(
+  baseUrl: string,
+  path: string,
+  opts: RequestInit & { token?: string } = {},
+): Promise<T> {
   const { token, ...init } = opts;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -15,10 +17,13 @@ async function req<T>(path: string, opts: RequestInit & { token?: string } = {})
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${baseUrl}${path}`, { ...init, headers });
   if (!res.ok) {
     let msg = res.statusText;
-    try { const b = await res.json(); msg = b.error ?? msg; } catch {}
+    try {
+      const b = await res.json();
+      msg = b.error ?? msg;
+    } catch {}
     throw new ApiError(res.status, msg);
   }
   if (res.status === 204) return undefined as T;
@@ -45,96 +50,113 @@ export interface JobStatus { id: string; status: string; result?: unknown; error
 
 // ── Cloud endpoints (Clerk JWT bearer) ────────────────────────────────────────
 
-export const cloud = {
-  onboard: (token: string, body: { org_name: string; billing_email: string }) =>
-    req<OnboardingResponse>("/cloud/onboarding", { method: "POST", body: JSON.stringify(body), token }),
+export function makeCloud(baseUrl: string) {
+  return {
+    onboard: (token: string, body: { org_name: string; billing_email: string }) =>
+      req<OnboardingResponse>(baseUrl, "/cloud/onboarding", { method: "POST", body: JSON.stringify(body), token }),
 
-  listOrgs: (token: string) =>
-    req<{ organizations: Org[] }>("/cloud/organizations", { token }),
+    listOrgs: (token: string) =>
+      req<{ organizations: Org[] }>(baseUrl, "/cloud/organizations", { token }),
 
-  getOrg: (token: string, orgId: string) =>
-    req<OrgDetail>(`/cloud/organizations/${orgId}`, { token }),
+    getOrg: (token: string, orgId: string) =>
+      req<OrgDetail>(baseUrl, `/cloud/organizations/${orgId}`, { token }),
 
-  updateOrg: (token: string, orgId: string, body: { name: string; billing_email: string }) =>
-    req<OrgDetail>(`/cloud/organizations/${orgId}`, { method: "PATCH", body: JSON.stringify(body), token }),
+    updateOrg: (token: string, orgId: string, body: { name: string; billing_email: string }) =>
+      req<OrgDetail>(baseUrl, `/cloud/organizations/${orgId}`, { method: "PATCH", body: JSON.stringify(body), token }),
 
-  deleteOrg: (token: string, orgId: string) =>
-    req<void>(`/cloud/organizations/${orgId}`, { method: "DELETE", token }),
+    deleteOrg: (token: string, orgId: string) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}`, { method: "DELETE", token }),
 
-  listMembers: (token: string, orgId: string) =>
-    req<{ members: Member[] }>(`/cloud/organizations/${orgId}/members`, { token }),
+    listMembers: (token: string, orgId: string) =>
+      req<{ members: Member[] }>(baseUrl, `/cloud/organizations/${orgId}/members`, { token }),
 
-  updateMember: (token: string, orgId: string, clerkUserId: string, role: string) =>
-    req<Member>(`/cloud/organizations/${orgId}/members/${clerkUserId}`, { method: "PATCH", body: JSON.stringify({ role }), token }),
+    updateMember: (token: string, orgId: string, clerkUserId: string, role: string) =>
+      req<Member>(baseUrl, `/cloud/organizations/${orgId}/members/${clerkUserId}`, { method: "PATCH", body: JSON.stringify({ role }), token }),
 
-  removeMember: (token: string, orgId: string, clerkUserId: string) =>
-    req<void>(`/cloud/organizations/${orgId}/members/${clerkUserId}`, { method: "DELETE", token }),
+    removeMember: (token: string, orgId: string, clerkUserId: string) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}/members/${clerkUserId}`, { method: "DELETE", token }),
 
-  createInvite: (token: string, orgId: string, body: { email: string; role: string }) =>
-    req<Invite>(`/cloud/organizations/${orgId}/invites`, { method: "POST", body: JSON.stringify(body), token }),
+    createInvite: (token: string, orgId: string, body: { email: string; role: string }) =>
+      req<Invite>(baseUrl, `/cloud/organizations/${orgId}/invites`, { method: "POST", body: JSON.stringify(body), token }),
 
-  listInvites: (token: string, orgId: string) =>
-    req<{ invites: Invite[] }>(`/cloud/organizations/${orgId}/invites`, { token }),
+    listInvites: (token: string, orgId: string) =>
+      req<{ invites: Invite[] }>(baseUrl, `/cloud/organizations/${orgId}/invites`, { token }),
 
-  revokeInvite: (token: string, orgId: string, inviteToken: string) =>
-    req<void>(`/cloud/organizations/${orgId}/invites/${inviteToken}`, { method: "DELETE", token }),
+    revokeInvite: (token: string, orgId: string, inviteToken: string) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}/invites/${inviteToken}`, { method: "DELETE", token }),
 
-  acceptInvite: (token: string, inviteToken: string) =>
-    req<{ status: string; org_id: string; role: string }>(`/cloud/invites/${inviteToken}/accept`, { method: "POST", token }),
+    acceptInvite: (token: string, inviteToken: string) =>
+      req<{ status: string; org_id: string; role: string }>(baseUrl, `/cloud/invites/${inviteToken}/accept`, { method: "POST", token }),
 
-  createApiKey: (token: string, orgId: string, name: string) =>
-    req<ApiKeyCreated>(`/cloud/organizations/${orgId}/api-keys`, { method: "POST", body: JSON.stringify({ name }), token }),
+    createApiKey: (token: string, orgId: string, name: string) =>
+      req<ApiKeyCreated>(baseUrl, `/cloud/organizations/${orgId}/api-keys`, { method: "POST", body: JSON.stringify({ name }), token }),
 
-  listApiKeys: (token: string, orgId: string) =>
-    req<{ api_keys: ApiKey[] }>(`/cloud/organizations/${orgId}/api-keys`, { token }),
+    listApiKeys: (token: string, orgId: string) =>
+      req<{ api_keys: ApiKey[] }>(baseUrl, `/cloud/organizations/${orgId}/api-keys`, { token }),
 
-  revokeApiKey: (token: string, orgId: string, keyId: string) =>
-    req<void>(`/cloud/organizations/${orgId}/api-keys/${keyId}`, { method: "DELETE", token }),
+    revokeApiKey: (token: string, orgId: string, keyId: string) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}/api-keys/${keyId}`, { method: "DELETE", token }),
 
-  createPaymentIntent: (token: string, body: { amount_cents: number; currency: string }) =>
-    req<PaymentIntentRes>("/cloud/billing/purchase", { method: "POST", body: JSON.stringify(body), token }),
+    createPaymentIntent: (token: string, body: { amount_cents: number; currency: string }) =>
+      req<PaymentIntentRes>(baseUrl, "/cloud/billing/purchase", { method: "POST", body: JSON.stringify(body), token }),
 
-  getBillingHistory: (token: string) =>
-    req<BillingHistory>("/cloud/billing/history", { token }),
+    getBillingHistory: (token: string) =>
+      req<BillingHistory>(baseUrl, "/cloud/billing/history", { token }),
 
-  getUsage: (token: string, orgId: string, params?: { start?: string; end?: string; breakdown?: string }) => {
-    const qs = new URLSearchParams(params as Record<string, string>).toString();
-    return req<UsageStats>(`/cloud/organizations/${orgId}/usage${qs ? `?${qs}` : ""}`, { token });
-  },
+    getUsage: (token: string, orgId: string, params?: { start?: string; end?: string; breakdown?: string }) => {
+      const qs = new URLSearchParams(params as Record<string, string>).toString();
+      return req<UsageStats>(baseUrl, `/cloud/organizations/${orgId}/usage${qs ? `?${qs}` : ""}`, { token });
+    },
 
-  getCredits: (token: string, orgId: string) =>
-    req<{ org_id: string; balance: number }>(`/cloud/organizations/${orgId}/credits`, { token }),
-};
+    getCredits: (token: string, orgId: string) =>
+      req<{ org_id: string; balance: number }>(baseUrl, `/cloud/organizations/${orgId}/credits`, { token }),
+  };
+}
 
-// ── SDK endpoints (project API key bearer) ────────────────────────────────────
+// ── SDK endpoints (project API key) ──────────────────────────────────────────
 
-export const sdk = {
-  createWallet: (token: string, body: { user_id: string; chain_type: "evm" | "solana"; label?: string }) =>
-    req<Wallet>("/sdk/wallets", { method: "POST", body: JSON.stringify(body), token }),
+export function makeSDK(baseUrl: string) {
+  return {
+    createWallet: (token: string, body: { user_id: string; chain_type: "evm" | "solana"; label?: string }) =>
+      req<Wallet>(baseUrl, "/sdk/wallets", { method: "POST", body: JSON.stringify(body), token }),
 
-  getWallet: (token: string, walletId: string) =>
-    req<Wallet>(`/sdk/wallets/${walletId}`, { token }),
+    getWallet: (token: string, walletId: string) =>
+      req<Wallet>(baseUrl, `/sdk/wallets/${walletId}`, { token }),
 
-  listUserWallets: (token: string, userId: string) =>
-    req<{ wallets: Wallet[] }>(`/sdk/users/${userId}/wallets`, { token }),
+    listUserWallets: (token: string, userId: string) =>
+      req<{ wallets: Wallet[] }>(baseUrl, `/sdk/users/${userId}/wallets`, { token }),
 
-  getBalance: (token: string, walletId: string, chainId?: string) => {
-    const qs = chainId ? `?chain_id=${chainId}` : "";
-    return req<{ address: string; balance: string; unit: string; chain_id?: string }>(`/sdk/wallets/${walletId}/balance${qs}`, { token });
-  },
+    getBalance: (token: string, walletId: string, chainId?: string) => {
+      const qs = chainId ? `?chain_id=${chainId}` : "";
+      return req<{ address: string; balance: string; unit: string; chain_id?: string }>(
+        baseUrl, `/sdk/wallets/${walletId}/balance${qs}`, { token },
+      );
+    },
 
-  stablecoinTransfer: (
-    token: string,
-    walletId: string,
-    chainType: "evm" | "solana",
-    body: { token: string; to: string; amount: string; chain_id?: string; gasless?: boolean; idempotency_key?: string },
-  ) => req<{ job_id: string; status: string }>(`/sdk/wallets/${walletId}/stablecoin/transfer/${chainType}`, { method: "POST", body: JSON.stringify(body), token }),
+    stablecoinTransfer: (
+      token: string,
+      walletId: string,
+      chainType: "evm" | "solana",
+      body: { token: string; to: string; amount: string; chain_id?: string; gasless?: boolean; idempotency_key?: string },
+    ) => req<{ job_id: string; status: string }>(
+      baseUrl, `/sdk/wallets/${walletId}/stablecoin/transfer/${chainType}`,
+      { method: "POST", body: JSON.stringify(body), token },
+    ),
 
-  stablecoinBalance: (token: string, walletId: string, chainType: "evm" | "solana", stablecoin: string, chainId?: string) => {
-    const qs = new URLSearchParams({ token: stablecoin, ...(chainId ? { chain_id: chainId } : {}) }).toString();
-    return req<{ address: string; token: string; symbol: string; balance: string; raw_balance: string; chain_id?: string }>(`/sdk/wallets/${walletId}/stablecoin/balance/${chainType}?${qs}`, { token });
-  },
+    stablecoinBalance: (token: string, walletId: string, chainType: "evm" | "solana", stablecoin: string, chainId?: string) => {
+      const qs = new URLSearchParams({ token: stablecoin, ...(chainId ? { chain_id: chainId } : {}) }).toString();
+      return req<{ address: string; token: string; symbol: string; balance: string; raw_balance: string; chain_id?: string }>(
+        baseUrl, `/sdk/wallets/${walletId}/stablecoin/balance/${chainType}?${qs}`, { token },
+      );
+    },
 
-  getJob: (token: string, jobId: string) =>
-    req<JobStatus>(`/sdk/jobs/${jobId}`, { token }),
-};
+    getJob: (token: string, jobId: string) =>
+      req<JobStatus>(baseUrl, `/sdk/jobs/${jobId}`, { token }),
+  };
+}
+
+// ── Legacy singleton (backward-compat, uses NEXT_PUBLIC_BACKEND_URL) ──────────
+// Still used by pages that haven't been migrated to useApi() yet.
+const _legacyBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
+export const cloud = makeCloud(_legacyBase);
+export const sdk = makeSDK(_legacyBase);
