@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { ArrowLeftRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { sdk } from "@/lib/api";
+import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CopyButton } from "@/components/shared/CopyButton";
@@ -13,6 +13,7 @@ type TransferResult = { job_id: string; status: string } | null;
 
 export default function TransfersPage() {
   const { getToken } = useAuth();
+  const { sdk } = useApi();
 
   // Form state
   const [apiKey, setApiKey] = useState("");

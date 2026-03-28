@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Plus, Wallet, Search } from "lucide-react";
 import { toast } from "sonner";
-import { sdk, type Wallet as WalletType } from "@/lib/api";
+import { type Wallet as WalletType } from "@/lib/api";
+import { useApi } from "@/hooks/useApi";
 import { useOrg } from "@/hooks/useOrg";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -139,6 +140,7 @@ function WalletTable({ wallets }: { wallets: WalletType[] }) {
 
 function CreateWalletModal({ onClose, onCreated }: { onClose: () => void; onCreated: (w: WalletType) => void }) {
   const { getToken } = useAuth();
+  const { sdk } = useApi();
   const [apiKey, setApiKey] = useState("");
   const [userId, setUserId] = useState("");
   const [chain, setChain] = useState<"evm" | "solana">("evm");

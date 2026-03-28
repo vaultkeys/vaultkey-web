@@ -4,16 +4,18 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Plus, KeyRound, Trash2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { cloud, type ApiKey, type ApiKeyCreated } from "@/lib/api";
+import { type ApiKey, type ApiKeyCreated } from "@/lib/api";
 import { useOrg } from "@/hooks/useOrg";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { formatDate } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export default function ApiKeysPage() {
   const { getToken } = useAuth();
   const { orgId } = useOrg();
+  const { cloud } = useApi();
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -165,6 +167,7 @@ function SecretRow({ label, value }: { label: string; value: string }) {
 
 function CreateKeyModal({ onClose, onCreated, orgId }: { onClose: () => void; onCreated: (k: ApiKeyCreated) => void; orgId: string }) {
   const { getToken } = useAuth();
+  const { cloud } = useApi();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 

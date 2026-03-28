@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { cloud } from "@/lib/api";
 import { useOrg } from "@/hooks/useOrg";
+import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SettingsPage() {
   const { getToken } = useAuth();
   const { org, orgId, refetch } = useOrg();
+  const { cloud } = useApi();
 
   const [name, setName] = useState("");
   const [billingEmail, setBillingEmail] = useState("");

@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Wallet, ArrowLeftRight, Zap, TrendingUp } from "lucide-react";
-import { cloud, type UsageStats } from "@/lib/api";
+import { type UsageStats } from "@/lib/api";
 import { useOrg } from "@/hooks/useOrg";
 import { StatCard } from "@/components/shared/StatCard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { formatCredits, operationLabel, formatDate } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const { org, orgId, loading: orgLoading } = useOrg();
+  const { cloud } = useApi();
   const [stats, setStats] = useState<UsageStats | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
