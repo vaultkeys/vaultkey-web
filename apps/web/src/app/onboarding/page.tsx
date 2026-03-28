@@ -9,6 +9,7 @@ import { makeCloud } from "@/lib/api";
 import { useOrg } from "@/hooks/useOrg";
 import { useEnv } from "@/hooks/useEnv";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 const STEPS = ["Organization", "Review"] as const;
 

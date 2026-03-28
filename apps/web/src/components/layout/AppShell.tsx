@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useOrg } from "@/hooks/useOrg";
 import { useEnv } from "@/hooks/useEnv";
 import { EnvSwitcher } from "@/components/layout/EnvSwitcher";
+import React from "react";
 
 const nav = [
   { label: "Dashboard",   href: "/dashboard",    icon: LayoutDashboard },

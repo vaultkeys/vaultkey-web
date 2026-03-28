@@ -157,6 +157,6 @@ export function makeSDK(baseUrl: string) {
 
 // ── Legacy singleton (backward-compat, uses NEXT_PUBLIC_BACKEND_URL) ──────────
 // Still used by pages that haven't been migrated to useApi() yet.
-const _legacyBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
-export const cloud = makeCloud(_legacyBase);
-export const sdk = makeSDK(_legacyBase);
+// const _legacyBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
+// export const cloud = makeCloud(_legacyBase);
+// export const sdk = makeSDK(_legacyBase);

@@ -3,6 +3,7 @@
 import { useEnv, type Env } from "@/hooks/useEnv";
 import { cn } from "@/lib/utils";
 import { FlaskConical, Globe } from "lucide-react";
+import React from "react";
 
 /**
  * Compact environment toggle shown in the sidebar.

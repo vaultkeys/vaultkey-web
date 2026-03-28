@@ -1,6 +1,7 @@
 {
   "extends": "@vaultkey/typescript-config/nextjs.json",
   "compilerOptions": {
+    "jsx": "preserve",
     "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },

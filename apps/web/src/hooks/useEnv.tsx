@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export type Env = "mainnet" | "testnet";
 
@@ -16,8 +16,6 @@ interface EnvCtx {
 const MAINNET_URL = process.env.NEXT_PUBLIC_MAINNET_BACKEND_URL ?? "http://localhost:8080";
 const TESTNET_URL = process.env.NEXT_PUBLIC_TESTNET_BACKEND_URL ?? "http://localhost:8081";
 const STORAGE_KEY = "vaultkey_env";
-
-import React from "react";
 
 const EnvContext = createContext<EnvCtx>({
   env: "mainnet",
