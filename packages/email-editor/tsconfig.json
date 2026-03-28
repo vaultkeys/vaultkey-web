@@ -1,5 +1,5 @@
 {
-  "extends": "@usesend/typescript-config/react-library.json",
+  "extends": "@vaultkey/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist"
   },

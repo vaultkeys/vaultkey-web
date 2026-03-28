@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@usesend/ui/src/popover";
+} from "@vaultkey/ui/src/popover";
 import { ReactNode, useState } from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
 

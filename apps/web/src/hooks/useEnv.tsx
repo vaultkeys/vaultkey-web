@@ -27,17 +27,15 @@ const EnvContext = createContext<EnvCtx>({
 });
 
 export function EnvProvider({ children }: { children: React.ReactNode }) {
-  const [env, setEnvState] = useState<Env>("mainnet");
-
-  // Hydrate from localStorage on mount (client-only)
-  useEffect(() => {
+  const [env, setEnvState] = useState<Env>(() => {
+    if (typeof window === "undefined") return "testnet";
     try {
       const stored = localStorage.getItem(STORAGE_KEY) as Env | null;
-      if (stored === "testnet" || stored === "mainnet") {
-        setEnvState(stored);
-      }
-    } catch {}
-  }, []);
+      return stored === "testnet" ? "testnet" : "mainnet";
+    } catch {
+      return "mainnet";
+    }
+  });
 
   const setEnv = useCallback((e: Env) => {
     setEnvState(e);

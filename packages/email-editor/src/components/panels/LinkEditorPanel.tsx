@@ -1,4 +1,4 @@
-import { Button } from "@usesend/ui/src/button";
+import { Button } from "@vaultkey/ui/src/button";
 import { CheckIcon } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 

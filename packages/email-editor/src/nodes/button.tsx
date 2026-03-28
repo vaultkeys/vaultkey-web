@@ -11,12 +11,12 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@usesend/ui/src/popover";
-import { cn } from "@usesend/ui/lib/utils";
-import { Input } from "@usesend/ui/src/input";
-import { Button } from "@usesend/ui/src/button";
+} from "@vaultkey/ui/src/popover";
+import { cn } from "@vaultkey/ui/lib/utils";
+import { Input } from "@vaultkey/ui/src/input";
+import { Button } from "@vaultkey/ui/src/button";
 import { AllowedAlignments, ButtonOptions } from "../types";
-import { Separator } from "@usesend/ui/src/separator";
+import { Separator } from "@vaultkey/ui/src/separator";
 import { BorderWidth } from "../components/ui/icons/BorderWidth";
 import { ColorPickerPopup } from "../components/ui/ColorPicker";
 import { LinkEditorPanel } from "../components/panels/LinkEditorPanel";
@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipContent,
   TooltipTrigger,
-} from "@usesend/ui/src/tooltip";
+} from "@vaultkey/ui/src/tooltip";
 
 const alignments: Array<AllowedAlignments> = ["left", "center", "right"];
 
