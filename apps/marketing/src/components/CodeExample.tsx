@@ -3,31 +3,53 @@ import { CodeBlock } from "@vaultkey/ui/src/code-block";
 import { CodeBlockWithCopy } from "@vaultkey/ui/src/code-block-with-copy";
 import { LangToggle } from "./CodeLangToggle";
 
-const TS_CODE = `import { UseSend } from "vaultkey-js";
+const TS_CODE = `import { VaultKey } from "vaultkey-js";
 
-const usesend = new UseSend("us_12345");
+const vk = new VaultKey("vk_live_your_api_key");
 
-usesend.emails.send({
-  to: "hello@acme.com",
-  from: "hello@company.com",
-  subject: "useSend email",
-  html: "<p>useSend is the best open source product to send emails</p>",
-  text: "useSend is the best open source product to send emails",
-});`;
+// Create a custodial wallet
+const wallet = await vk.wallets.create({
+  user_id: "user_123",
+  chain_type: "evm",
+  label: "main",
+});
 
-const PY_CODE = `from usesend import UseSend
+// Send USDC on Polygon
+const job = await vk.wallets.stablecoinTransfer(wallet.id, "evm", {
+  token: "usdc",
+  to: "0xRecipientAddress",
+  amount: "50.00",
+  chain_id: "137",
+});
 
-client = UseSend("us_12345")
+// Poll for result
+const result = await vk.jobs.get(job.job_id);
+console.log(result.status); // "completed"`;
 
-data, err = client.emails.send({
-    "to": "hello@acme.com",
-    "from": "hello@company.com",
-    "subject": "useSend email",
-    "html": "<p>useSend is the best open source product to send emails</p>",
-    "text": "useSend is the best open source product to send emails",
-})
+const PY_CODE = `from vaultkey import VaultKey
 
-print(data or err)`;
+vk = VaultKey("vk_live_your_api_key")
+
+# Create a custodial wallet
+wallet = vk.wallets.create(
+    user_id="user_123",
+    chain_type="evm",
+    label="main",
+)
+
+# Send USDC on Polygon
+job = vk.wallets.stablecoin_transfer(
+    wallet_id=wallet["id"],
+    chain_type="evm",
+    token="usdc",
+    to="0xRecipientAddress",
+    amount="50.00",
+    chain_id="137",
+)
+
+# Poll for result
+result = vk.jobs.get(job["job_id"])
+print(result["status"])  # "completed"`;
 
 const GO_CODE = `package main
 
@@ -39,48 +61,39 @@ import (
 )
 
 func main() {
-    url := "https://app.usesend.com/api/v1/emails"
-
-    payload := strings.NewReader("{\n     \\\"to\\\": \\\"hello@acme.com\\\",\n     \\\"from\\\": \\\"hello@company.com\\\",\n     \\\"subject\\\": \\\"useSend email\\\",\n     \\\"html\\\": \\\"<p>useSend is the best open source product to send emails</p>\\\",\n     \\\"text\\\": \\\"useSend is the best open source product to send emails\\\"\n    }")
-
-    req, _ := http.NewRequest("POST", url, payload)
+    // Create a custodial wallet
+    walletPayload := strings.NewReader(\`{
+        "user_id": "user_123",
+        "chain_type": "evm",
+        "label": "main"
+    }\`)
+    req, _ := http.NewRequest("POST",
+        "https://api.vaultkey.dev/sdk/wallets",
+        walletPayload)
     req.Header.Add("Content-Type", "application/json")
-    req.Header.Add("Authorization", "Bearer us_12345")
-
+    req.Header.Add("Authorization", "Bearer vk_live_your_api_key")
     res, _ := http.DefaultClient.Do(req)
     defer res.Body.Close()
-
     body, _ := io.ReadAll(res.Body)
-    fmt.Println(res)
     fmt.Println(string(body))
 }`;
 
-const PHP_CODE = `<?php
+const CURL_CODE = `# Create a custodial wallet
+curl -X POST https://api.vaultkey.dev/sdk/wallets \\
+  -H "Authorization: Bearer vk_live_your_api_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{"user_id":"user_123","chain_type":"evm","label":"main"}'
 
-$ch = curl_init('https://app.usesend.com/api/v1/emails');
-curl_setopt_array($ch, [
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_HTTPHEADER => [
-    'Content-Type: application/json',
-    'Authorization: Bearer us_12345',
-  ],
-  CURLOPT_POST => true,
-  CURLOPT_POSTFIELDS => json_encode([
-    'to' => 'hello@acme.com',
-    'from' => 'hello@company.com',
-    'subject' => 'useSend email',
-    'html' => '<p>useSend is the best open source product to send emails</p>',
-    'text' => 'useSend is the best open source product to send emails',
-  ]),
-]);
-
-$response = curl_exec($ch);
-if ($response === false) {
-  echo 'cURL error: ' . curl_error($ch);
-} else {
-  echo $response;
-}
-curl_close($ch);`;
+# Send USDC on Polygon
+curl -X POST https://api.vaultkey.dev/sdk/wallets/{walletId}/stablecoin/transfer/evm \\
+  -H "Authorization: Bearer vk_live_your_api_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "token": "usdc",
+    "to": "0xRecipientAddress",
+    "amount": "50.00",
+    "chain_id": "137"
+  }'`;
 
 export function CodeExample() {
   const containerId = "code-example";
@@ -107,11 +120,11 @@ export function CodeExample() {
       code: GO_CODE,
     },
     {
-      key: "php",
-      label: "PHP",
-      kind: "php",
-      shiki: "php" as const,
-      code: PHP_CODE,
+      key: "curl",
+      label: "cURL",
+      kind: "curl",
+      shiki: "bash" as const,
+      code: CURL_CODE,
     },
   ];
 
@@ -123,8 +136,8 @@ export function CodeExample() {
             Developers
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            Typed SDKs and simple APIs, so you can focus on product not
-            plumbing.
+            Typed SDKs and a simple REST API — integrate custodial wallets in
+            minutes, not weeks.
           </p>
         </div>
 
@@ -149,7 +162,6 @@ export function CodeExample() {
                     data-lang-slot={l.key}
                     className={idx === 0 ? "block" : "hidden"}
                   >
-                    {/* Cast to any to align with shiki BundledLanguage without importing types here */}
                     <CodeBlockWithCopy code={l.code}>
                       <CodeBlock
                         lang={l.shiki as any}
@@ -171,7 +183,7 @@ export function CodeExample() {
         <div className="mt-6 flex items-center justify-center gap-3">
           <Button size="lg" className="px-6">
             <a
-              href="https://docs.usesend.com"
+              href="https://docs.vaultkey.dev"
               target="_blank"
               rel="noopener noreferrer"
             >

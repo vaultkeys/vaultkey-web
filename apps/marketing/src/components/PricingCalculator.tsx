@@ -18,7 +18,7 @@ function Slider({
   onChange,
   min = 0,
   max = 100000,
-  step = 500,
+  step = 100,
   suffix = "",
 }: SliderProps) {
   const id = React.useId();
@@ -83,18 +83,18 @@ function Slider({
 }
 
 export function PricingCalculator() {
-  // Rates from pricing copy
-  const MARKETING_RATE = 0.001; // $ per marketing email
-  const TRANSACTIONAL_RATE = 0.0004; // $ per transactional email
-  const MINIMUM_SPEND = 10; // $ minimum monthly spend
+  // 1 credit = $0.0001 — rates in credits per operation
+  const WALLET_CREATE_CREDITS = 1;       // 1 credit per wallet creation
+  const STABLECOIN_TRANSFER_CREDITS = 5; // 5 credits per stablecoin transfer
+  const CREDIT_COST_USD = 0.0001;        // $0.0001 per credit
+  const MINIMUM_SPEND = 10;             // $10 minimum monthly spend
 
-  // Defaults chosen to total $10: 8000*$0.001 + 5000*$0.0004 = 10
-  const [marketing, setMarketing] = React.useState<number>(5000);
-  const [transactional, setTransactional] = React.useState<number>(12500);
+  const [walletCreations, setWalletCreations] = React.useState<number>(5000);
+  const [stablecoinTransfers, setStablecoinTransfers] = React.useState<number>(2000);
 
-  const marketingCost = marketing * MARKETING_RATE;
-  const transactionalCost = transactional * TRANSACTIONAL_RATE;
-  const subtotal = marketingCost + transactionalCost;
+  const walletCost = walletCreations * WALLET_CREATE_CREDITS * CREDIT_COST_USD;
+  const transferCost = stablecoinTransfers * STABLECOIN_TRANSFER_CREDITS * CREDIT_COST_USD;
+  const subtotal = walletCost + transferCost;
   const totalDue = Math.max(subtotal, MINIMUM_SPEND);
 
   return (
@@ -113,50 +113,42 @@ export function PricingCalculator() {
 
             <div className="grid grid-cols-1 gap-6">
               <Slider
-                label="Marketing emails / month"
-                value={marketing}
-                onChange={setMarketing}
+                label="Wallet creations / month"
+                value={walletCreations}
+                onChange={setWalletCreations}
                 min={0}
-                max={3000000}
-                step={500}
-                suffix="emails"
+                max={500000}
+                step={100}
+                suffix="wallets"
               />
               <Slider
-                label="Transactional emails / month"
-                value={transactional}
-                onChange={setTransactional}
+                label="Stablecoin transfers / month"
+                value={stablecoinTransfers}
+                onChange={setStablecoinTransfers}
                 min={0}
-                max={3000000}
-                step={500}
-                suffix="emails"
+                max={200000}
+                step={100}
+                suffix="transfers"
               />
             </div>
 
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
               <div className="rounded-lg border border-primary/30 p-4">
-                <div className="text-xs text-muted-foreground">Marketing</div>
-                <div className="text-lg font-medium">
-                  ${marketingCost.toFixed(2)}
-                </div>
+                <div className="text-xs text-muted-foreground">Wallet creations</div>
+                <div className="text-lg font-medium">${walletCost.toFixed(2)}</div>
                 <div className="text-xs text-muted-foreground">
-                  @ ${MARKETING_RATE.toFixed(4)} each
+                  {WALLET_CREATE_CREDITS} credit each
                 </div>
               </div>
               <div className="rounded-lg border border-primary/30 p-4">
+                <div className="text-xs text-muted-foreground">Stablecoin transfers</div>
+                <div className="text-lg font-medium">${transferCost.toFixed(2)}</div>
                 <div className="text-xs text-muted-foreground">
-                  Transactional
-                </div>
-                <div className="text-lg font-medium">
-                  ${transactionalCost.toFixed(2)}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  @ ${TRANSACTIONAL_RATE.toFixed(4)} each
+                  {STABLECOIN_TRANSFER_CREDITS} credits each
                 </div>
               </div>
               <div className="rounded-lg border border-primary/30 p-4 bg-primary/10">
-                <div className="text-xs text-muted-foreground">
-                  Estimated Total
-                </div>
+                <div className="text-xs text-muted-foreground">Estimated Total</div>
                 <div className="text-3xl text-primary font-semibold">
                   ${totalDue.toFixed(2)}
                 </div>

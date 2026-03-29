@@ -1,10 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
-// Replaced StatusBadge with external status badge image
 
-const REPO = "usesend/usesend";
+const REPO = "vaultkey/vaultkey";
 const REPO_URL = `https://github.com/${REPO}`;
-const APP_URL = "https://app.usesend.com";
+const APP_URL = "https://app.vaultkey.dev";
+const DOCS_URL = "https://docs.vaultkey.dev";
 
 export function SiteFooter() {
   return (
@@ -12,13 +11,12 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex items-center gap-2 sm:w-56">
-            <Image
-              src="/logo-squircle.png"
-              alt="useSend"
-              width={24}
-              height={24}
-            />
-            <span className="text-primary font-mono">useSend</span>
+            <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center shrink-0">
+              <span className="font-bold text-[10px] font-mono text-primary-foreground">
+                VK
+              </span>
+            </div>
+            <span className="text-primary font-mono">VaultKey</span>
           </div>
 
           <div className="sm:ml-auto flex items-start gap-4">
@@ -40,6 +38,16 @@ export function SiteFooter() {
                   </li>
                   <li>
                     <a
+                      href={DOCS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-foreground text-xs"
+                    >
+                      Docs
+                    </a>
+                  </li>
+                  <li>
+                    <a
                       href={REPO_URL}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -48,27 +56,17 @@ export function SiteFooter() {
                       GitHub
                     </a>
                   </li>
-                  <li>
-                    <a
-                      href="https://docs.usesend.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-foreground text-xs"
-                    >
-                      Docs
-                    </a>
-                  </li>
                 </ul>
               </div>
 
               <div>
-                <div className="text-xs uppercase tracking-wider  mb-2">
+                <div className="text-xs uppercase tracking-wider mb-2">
                   Contact
                 </div>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>
                     <a
-                      href="mailto:hey@usesend.com"
+                      href="mailto:hey@vaultkey.dev"
                       className="hover:text-foreground text-xs"
                     >
                       Email
@@ -76,7 +74,7 @@ export function SiteFooter() {
                   </li>
                   <li>
                     <a
-                      href="https://x.com/useSend_com"
+                      href="https://x.com/vaultkey_dev"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-foreground text-xs"
@@ -86,32 +84,12 @@ export function SiteFooter() {
                   </li>
                   <li>
                     <a
-                      href="https://www.linkedin.com/company/use-send/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-foreground text-xs"
-                    >
-                      LinkedIn
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://discord.com/invite/BU8n8pJv8S"
+                      href="https://discord.gg/vaultkey"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-foreground text-xs"
                     >
                       Discord
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://bsky.app/profile/usesend.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-foreground text-xs"
-                    >
-                      Bluesky
                     </a>
                   </li>
                 </ul>
@@ -142,26 +120,25 @@ export function SiteFooter() {
               </div>
             </div>
 
+            {/* Replace with VaultKey status page URL when available */}
             <a
-              href="https://status.usesend.com"
+              href="https://status.vaultkey.dev"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Service status"
               title="Service status"
               className="inline-flex items-center"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://status.usesend.com/api/badge/2/status?upColor=30D9BD&style=plastic"
-                alt="Service status"
-                className="h-5"
-              />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] font-mono text-green-600 dark:text-green-400">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+                All systems operational
+              </span>
             </a>
           </div>
         </div>
 
         <div className="mt-6 text-xs text-muted-foreground mx-auto text-center">
-          © {new Date().getFullYear()} useSend. All rights reserved.
+          © {new Date().getFullYear()} VaultKey. All rights reserved.
         </div>
       </div>
     </footer>

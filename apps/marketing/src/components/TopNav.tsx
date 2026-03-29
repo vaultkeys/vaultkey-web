@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@vaultkey/ui/src/button";
 
-const REPO = "usesend/usesend";
+const REPO = "vaultkey/vaultkey";
 const REPO_URL = `https://github.com/${REPO}`;
-const APP_URL = "https://app.usesend.com";
+const APP_URL = "https://app.vaultkey.dev";
+const DOCS_URL = "https://docs.vaultkey.dev";
 
 export function TopNav() {
   const [open, setOpen] = useState(false);
@@ -20,8 +21,13 @@ export function TopNav() {
     <header className="py-4 border-b border-border sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-sidebar-background/80">
       <div className="mx-auto max-w-6xl px-6 flex items-center justify-between gap-4 text-sm">
         <Link href="/" className="flex items-center gap-2 group">
-          <Image src="/logo-squircle.png" alt="useSend" width={24} height={24} />
-          <span className="text-primary font-mono text-[16px] group-hover:opacity-90">useSend</span>
+          {/* Replace /logo-squircle.png with VaultKey logo when available */}
+          <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <span className="font-bold text-[10px] font-mono text-primary-foreground">VK</span>
+          </div>
+          <span className="text-primary font-mono text-[16px] group-hover:opacity-90">
+            VaultKey
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -30,7 +36,7 @@ export function TopNav() {
             Pricing
           </Link>
           <a
-            href="https://docs.usesend.com"
+            href={DOCS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-foreground"
@@ -58,25 +64,44 @@ export function TopNav() {
           className="sm:hidden inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-border"
           onClick={() => setOpen((v) => !v)}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-6 w-6"
+          >
             {open ? (
-              <path d="M6 18 18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M6 18 18 6M6 6l12 12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             ) : (
-              <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M3 6h18M3 12h18M3 18h18"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             )}
           </svg>
         </button>
       </div>
 
       {/* Mobile menu panel */}
-      {open ? (
+      {open && (
         <div className="sm:hidden border-t border-border bg-sidebar-background/95 backdrop-blur">
           <div className="mx-auto max-w-6xl px-6 py-3 flex flex-col gap-2">
-            <Link href={pricingHref} className="py-2 text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
+            <Link
+              href={pricingHref}
+              className="py-2 text-muted-foreground hover:text-foreground"
+              onClick={() => setOpen(false)}
+            >
               Pricing
             </Link>
             <a
-              href="https://docs.usesend.com"
+              href={DOCS_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="py-2 text-muted-foreground hover:text-foreground"
@@ -95,14 +120,19 @@ export function TopNav() {
             </a>
             <div className="pt-2">
               <Button className="w-full">
-                <a href={APP_URL} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
+                <a
+                  href={APP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                >
                   Get started
                 </a>
               </Button>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }

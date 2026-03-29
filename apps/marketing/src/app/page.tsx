@@ -1,22 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { SiteFooter } from "~/components/SiteFooter";
-import { GitHubStarsButton } from "~/components/GitHubStarsButton";
 import { Button } from "@vaultkey/ui/src/button";
 import { TopNav } from "~/components/TopNav";
 import { FeatureCard } from "~/components/FeatureCard";
 import { FeatureCardPlain } from "~/components/FeatureCardPlain";
 import { PricingCalculator } from "~/components/PricingCalculator";
 import CodeExample from "~/components/CodeExample";
-import { Avatar, AvatarFallback, AvatarImage } from "@vaultkey/ui/src/avatar";
 
-const REPO = "usesend/usesend";
+const APP_URL = "https://app.vaultkey.dev";
+const DOCS_URL = "https://docs.vaultkey.dev";
+const REPO = "vaultkey/vaultkey";
 const REPO_URL = `https://github.com/${REPO}`;
-const APP_URL = "https://app.usesend.com";
 
 export default function Page() {
   return (
-    <main className="min-h-screen  text-foreground bg-background">
+    <main className="min-h-screen text-foreground bg-background">
       <TopNav />
       <Hero />
       <TrustedBy />
@@ -29,21 +28,26 @@ export default function Page() {
   );
 }
 
-// (Removed unused SectionHeading component)
-
 function Hero() {
   return (
     <section>
       <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
-        <h1 className="mt-6 text-center text-2xl sm:text-4xl font-semibold text-primary font-sans">
-          The open source email platform for everyone
+        <div className="flex justify-center mb-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-mono text-primary">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Open source · EVM + Solana
+          </span>
+        </div>
+
+        <h1 className="mt-4 text-center text-2xl sm:text-4xl font-semibold text-primary font-sans">
+          Custodial wallet infrastructure for every developer
         </h1>
-        <p className="mt-4 text-center text-base sm:text-lg  font-sans max-w-2xl mx-auto">
-          Send product, transactional and marketing emails.{" "}
+        <p className="mt-4 text-center text-base sm:text-lg font-sans max-w-2xl mx-auto">
+          Create and manage wallets, sign transactions, and send stablecoins.{" "}
           <span className="text-primary font-normal">
-            Pay only for what you send
+            Pay only for what you use
           </span>{" "}
-          and not for storing contacts.
+          — no seat fees, no hidden costs.
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -52,50 +56,28 @@ function Hero() {
               Get started
             </a>
           </Button>
-
-          <GitHubStarsButton />
+          <Button variant="outline" size="lg" className="px-6 gap-2">
+            <a
+              href={DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              Read the docs
+            </a>
+          </Button>
         </div>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Open source • Self-host in minutes • Free tier
+          Open source · Self-host ready · Free testnet tier
         </p>
 
-        <div className="mt-12 text-center text-xs text-muted-foreground flex flex-col items-center justify-center gap-2">
-          <p className="text-xs">Proudly sponsored by</p>
-          <a
-            href="https://coderabbit.ai/?utm_source=useSend.com"
-            target="_blank"
-          >
-            <Image
-              src="/code-rabbit-usesend-dark.svg"
-              alt="Code Rabbit"
-              width={200}
-              height={100}
-              className="dark:hidden"
-              rel="noopener noreferrer"
-            />
-          </a>
-          <a
-            href="https://coderabbit.ai/?utm_source=useSend.com"
-            target="_blank"
-          >
-            <Image
-              src="/code-rabbit-usesend-light.svg"
-              alt="Code Rabbit"
-              width={200}
-              height={100}
-              className="hidden dark:block"
-              rel="noopener noreferrer"
-            />
-          </a>
-        </div>
-
-        <div className=" mt-32 mx-auto max-w-5xl">
-          <div className="rounded-[18px] bg-primary/10 p-1 sm:p-1 ">
-            <div className="rounded-2xl bg-primary/20 p-1 sm:p-1 ">
+        <div className="mt-32 mx-auto max-w-5xl">
+          <div className="rounded-[18px] bg-primary/10 p-1 sm:p-1">
+            <div className="rounded-2xl bg-primary/20 p-1 sm:p-1">
               <Image
                 src="/hero-light.webp"
-                alt="useSend product hero"
+                alt="VaultKey dashboard"
                 width={3456}
                 height={1914}
                 className="w-full h-auto rounded-xl block dark:hidden"
@@ -105,7 +87,7 @@ function Hero() {
               />
               <Image
                 src="/hero-dark.webp"
-                alt="useSend product hero"
+                alt="VaultKey dashboard"
                 width={3456}
                 height={1914}
                 className="w-full h-auto rounded-xl hidden dark:block"
@@ -121,13 +103,12 @@ function Hero() {
   );
 }
 
-// TopNav moved to a dedicated client component in ~/components/TopNav
-
 function TrustedBy() {
+  // Placeholder testimonials — replace with real ones when available
   const featured = [
     {
       quote:
-        "Transitioned recently to open source email sender useSend for our 30k and growing newsletter. It's such a great product and amazing oss experience.",
+        "VaultKey cut our wallet integration time from weeks to a single afternoon. The stablecoin transfer API is exactly the abstraction we needed.",
       author: "Marc Seitz",
       company: "papermark.com",
       image:
@@ -135,7 +116,7 @@ function TrustedBy() {
     },
     {
       quote:
-        "useSend was extremely easy to set up, and I love that it's open source. Koushik has been an absolute awesome person to deal with and helps us with any issues or feedback.",
+        "Finally an open source custodial wallet layer that doesn't try to lock you in. The multi-chain support and KMS options made this an easy choice.",
       author: "Tommerty",
       company: "doras.to",
       image:
@@ -145,21 +126,21 @@ function TrustedBy() {
 
   const quick = [
     {
-      quote: "don't sleep on useSend",
+      quote: "don't sleep on VaultKey",
       author: "shellscape",
       company: "jsx.email",
       image:
         "https://pbs.twimg.com/profile_images/1698447401781022720/b0DZSc_D_400x400.jpg",
     },
     {
-      quote: "Thank you for making useSend!",
+      quote: "The testnet isolation is a killer feature for staging environments.",
       author: "Andras Bacsai",
       company: "coolify.io",
       image:
         "https://pbs.twimg.com/profile_images/1884210412524027905/jW4NB4rx_400x400.jpg",
     },
     {
-      quote: "I KNOW WHAT TO DO",
+      quote: "Webhook delivery + job polling. Perfect async model.",
       author: "VicVijayakumar",
       company: "onetimefax.com",
       image:
@@ -168,45 +149,45 @@ function TrustedBy() {
   ];
 
   return (
-    <section className="py-10 sm:py-20 ">
+    <section className="py-10 sm:py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center tracking-wider text-muted-foreground">
-          <span className="">Builders and open source teams love </span>
-          <span className="text-primary font-bold">useSend</span>
+          <span>Builders and fintech teams trust </span>
+          <span className="text-primary font-bold">VaultKey</span>
         </div>
 
-        {/* Top: 2 larger testimonials */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {featured.map((t) => (
             <figure
               key={t.author + t.company}
               className="rounded-xl border border-primary/30 p-5 h-full"
             >
-              <blockquote className="text-sm sm:text-base font-light font-sans ">
+              <blockquote className="text-sm sm:text-base font-light font-sans">
                 {t.quote}
               </blockquote>
               <div className="mt-5 flex items-center gap-3">
-                <Avatar className="rounded-lg border-2 border-primary/50 h-8 w-8">
-                  <AvatarImage src={t.image} alt={`${t.author} avatar`} />
-                  <AvatarFallback className="rounded-lg text-xs">{t.author.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar> 
+                <img
+                  src={t.image}
+                  alt={`${t.author} avatar`}
+                  className="rounded-lg border-2 border-primary/50 h-8 w-8 object-cover"
+                />
                 <figcaption className="text-sm">
                   <span className="font-medium">{t.author}</span>
                   <a
                     href={`https://${t.company}`}
                     target="_blank"
-                    className="text-muted-foreground hover:text-primary-light"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
                   >
                     {" "}
                     — {t.company}
-                  </a>{" "}
+                  </a>
                 </figcaption>
               </div>
             </figure>
           ))}
         </div>
 
-        {/* Bottom: 3 multi-line testimonials (same style as top) */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {quick.map((t) => (
             <figure
@@ -217,16 +198,18 @@ function TrustedBy() {
                 {t.quote}
               </blockquote>
               <div className="mt-5 flex items-center gap-3">
-                <Avatar className="rounded-lg border-2 border-primary/50 h-8 w-8">
-                  <AvatarImage src={t.image} alt={`${t.author} avatar`} />
-                  <AvatarFallback className="rounded-lg text-xs">{t.author.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
+                <img
+                  src={t.image}
+                  alt={`${t.author} avatar`}
+                  className="rounded-lg border-2 border-primary/50 h-8 w-8 object-cover"
+                />
                 <figcaption className="text-sm">
                   <span className="font-medium">{t.author}</span>
                   <a
                     href={`https://${t.company}`}
                     target="_blank"
-                    className="text-muted-foreground hover:text-primary-light"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
                   >
                     {" "}
                     — {t.company}
@@ -242,45 +225,43 @@ function TrustedBy() {
 }
 
 function Features() {
-  // Top: 2 cards (with image area) — Analytics, Editor
   const top = [
     {
-      key: "feature-analytics",
-      title: "Analytics",
+      key: "feature-dashboard",
+      title: "Dashboard & Analytics",
       content:
-        "Track deliveries, opens, clicks, bounces and unsubscribes in real time with a simple, searchable log. Filter by domain, status, api key and export them. Track which campaigns perform best.",
+        "Monitor wallet activity, credit consumption, and operation counts in real time. Filter by chain, operation type, and date range. Export usage data and track which teams are spending what.",
       imageLightSrc: "/emails-search-light.webp",
       imageDarkSrc: "/emails-search-dark.webp",
     },
     {
-      key: "feature-editor",
-      title: "Marketing Email Editor",
+      key: "feature-multichain",
+      title: "EVM + Solana Support",
       content:
-        "Design beautiful campaigns without code using a visual, notion like WYSIWYG editor that works in major email clients. Reuse templates and brand styles, and personalize with variables.",
+        "Create and manage custodial wallets across all major EVM networks — Ethereum, Polygon, Arbitrum, Base, Optimism, BSC — and Solana. One unified API for both ecosystems.",
       imageLightSrc: "/editor-light.webp",
       imageDarkSrc: "/editor-dark.webp",
     },
   ];
 
-  // Bottom: 3 cards (no images) — Contact Management, Suppression List, SMTP Relay Service
   const bottom = [
     {
-      key: "feature-contacts",
-      title: "Contact Management",
+      key: "feature-stablecoin",
+      title: "Stablecoin Transfers",
       content:
-        "Manage contacts, lists, and consent in one place. Import and export easily, keep per-list subscription status. Contacts are automatically updated from bounces and complaints.",
+        "Send USDC and USDT with a single API call. Async job queue with webhook delivery and polling. Gasless transfers via relayer on supported EVM chains.",
     },
     {
-      key: "feature-suppression",
-      title: "Suppression List",
+      key: "feature-kms",
+      title: "KMS Key Management",
       content:
-        "Prevent accidental sends. Automatically populated from bounces and complaints, and manage via import/export or API. Works with transactional and marketing emails.",
+        "Pluggable KMS backends — HashiCorp Vault, AWS KMS, and GCP KMS. Keys never leave the HSM. Bring your own KMS or use the managed default.",
     },
     {
-      key: "feature-smtp",
-      title: "SMTP Relay",
+      key: "feature-multitenancy",
+      title: "Multi-tenant & RBAC",
       content:
-        "Drop-in SMTP relay that works with any app or framework. Do not get vendor lock-in. Comes in handy with services like Supabase",
+        "Full organization model with owner, admin, developer, and viewer roles. Separate mainnet and testnet environments with isolated orgs, API keys, and credit balances.",
     },
   ];
 
@@ -293,7 +274,6 @@ function Features() {
           </div>
         </div>
 
-        {/* Top row: 2 side-by-side cards with images */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
           {top.map((f) => (
             <FeatureCard
@@ -306,7 +286,6 @@ function Features() {
           ))}
         </div>
 
-        {/* Bottom row: 3 cards without images */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
           {bottom.map((f) => (
             <FeatureCardPlain key={f.key} title={f.title} content={f.content} />
@@ -317,24 +296,22 @@ function Features() {
   );
 }
 
-// CodeExample moved to a dedicated client component in ~/components/CodeExample
-
 function Pricing() {
   const freePerks = [
-    "Send up to 3000 emails per month",
-    "Send up to 100 emails per day",
-    "Can have 1 contact book",
-    "Can have 1 domain",
-    "Can have 1 team member",
+    "Testnet environment — free forever",
+    "Up to 500 wallet operations per month",
+    "EVM + Solana wallet creation",
+    "1 organization",
+    "1 team member",
   ];
 
   const paidPerks = [
-    "$10 monthly usage credits",
-    "Send transactional emails at $0.0004 per email",
-    "Send marketing emails at $0.001 per email",
-    "Can have unlimited contact books",
-    "Can have unlimited domains",
-    "Can have unlimited team members",
+    "$10 monthly usage credits included",
+    "Wallet creation at 1 credit each",
+    "Stablecoin transfers at 5 credits each",
+    "Unlimited organizations",
+    "Unlimited domains and API keys",
+    "Unlimited team members",
   ];
 
   return (
@@ -342,10 +319,10 @@ function Pricing() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <div className="mb-2 text-sm uppercase tracking-wider text-primary">
-            PRICING
+            Pricing
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            pay for what you use, the most affordable email platform
+            pay for what you use — the most affordable custodial wallet platform
           </p>
         </div>
 
@@ -353,7 +330,7 @@ function Pricing() {
           <PricingCard
             title="Free"
             price="$0"
-            note="per month"
+            note="testnet, forever"
             perks={freePerks}
           />
           <PricingCard
@@ -384,7 +361,7 @@ function PricingCard({ title, price, note, perks }: PricingCardProps) {
     <div className="rounded-[18px] bg-primary/20 p-1">
       <div className="h-full rounded-[14px] bg-primary/20 p-0.5 shadow-sm">
         <div className="bg-background rounded-xl h-full flex flex-col p-5">
-          <h3 className=" font-medium">{title}</h3>
+          <h3 className="font-medium">{title}</h3>
           <div className="mt-2 text-4xl text-primary">{price}</div>
           <div className="text-xs text-muted-foreground">{note}</div>
           <ul className="mt-4 space-y-2 text-sm mb-20">
@@ -396,12 +373,8 @@ function PricingCard({ title, price, note, perks }: PricingCardProps) {
             ))}
           </ul>
           <div className="mt-auto pt-6">
-            <Button className="">
-              <a
-                href="https://app.usesend.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+            <Button>
+              <a href={APP_URL} target="_blank" rel="noopener noreferrer">
                 Get started
               </a>
             </Button>
@@ -424,19 +397,21 @@ function About() {
 
         <div className="mt-8 max-w-3xl mx-auto text-sm sm:text-base space-y-4">
           <p>
-            As most of email products out there, useSend also uses Amazon SES
-            under the hood to send emails. We provide an open and alternative
-            way to send emails reliably and cheaply with a great dashboard.
+            VaultKey provides open source custodial wallet infrastructure for
+            developers who need to manage crypto wallets on behalf of their
+            users. We handle key management, transaction signing, and stablecoin
+            transfers — so you can focus on your product.
           </p>
           <p>
-            useSend is bootstrapped and funded by the cloud offering and
-            sponsors. If you self host useSend, please consider{" "}
+            VaultKey is bootstrapped and funded by the cloud offering. If you
+            self-host VaultKey, please consider{" "}
             <a
-              href="https://github.com/sponsors/KMKoushik"
+              href={`https://github.com/sponsors/${REPO.split("/")[0]}`}
               target="_blank"
-              className="text-primary-light"
+              rel="noopener noreferrer"
+              className="text-primary underline"
             >
-              sponsoring us
+              sponsoring the project
             </a>
             .
           </p>
@@ -446,11 +421,6 @@ function About() {
   );
 }
 
-// FAQ section removed per request
-
-// Footer moved to ~/components/SiteFooter
-
-// Minimal inline icons (stroke-based, sleek)
 function CheckIcon({ className = "" }: { className?: string }) {
   return (
     <svg

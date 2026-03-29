@@ -17,21 +17,24 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "useSend – Open source email platform",
-  description: "Pay only for what you send, not for storing contacts",
+  title: "VaultKey – Open source custodial wallet infrastructure",
+  description:
+    "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
-  metadataBase: new URL("https://usesend.com"),
+  metadataBase: new URL("https://vaultkey.dev"),
   openGraph: {
-    title: "useSend – Open source email platform",
-    description: "Pay only for what you send, not for storing contacts",
-    url: "https://usesend.com",
-    siteName: "useSend",
+    title: "VaultKey – Open source custodial wallet infrastructure",
+    description:
+      "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
+    url: "https://vaultkey.dev",
+    siteName: "VaultKey",
     images: [
       {
-        url: "https://uploads.usesend.com/logos/og.png",
+        // Replace with actual OG image when available
+        url: "https://vaultkey.dev/og.png",
         width: 1200,
         height: 630,
-        alt: "useSend – Open source email platform",
+        alt: "VaultKey – Open source custodial wallet infrastructure",
         type: "image/png",
       },
     ],
@@ -40,16 +43,17 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "useSend – Open source email platform",
-    description: "Pay only for what you send, not for storing contacts",
-    images: ["https://uploads.usesend.com/logos/og.png"],
+    title: "VaultKey – Open source custodial wallet infrastructure",
+    description:
+      "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins.",
+    images: ["https://vaultkey.dev/og.png"],
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://usesend.com",
+    canonical: "https://vaultkey.dev",
   },
 };
 
@@ -70,7 +74,6 @@ export default function RootLayout({
       <body
         className={`font-mono ${inter.variable} ${jetbrainsMono.variable} bg-background`}
       >
-        {/* System theme with isolated storage to avoid stale overrides */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
