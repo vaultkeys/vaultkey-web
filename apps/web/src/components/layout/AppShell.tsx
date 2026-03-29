@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useOrg } from "@/hooks/useOrg";
 import { useEnv } from "@/hooks/useEnv";
 import { EnvSwitcher } from "@/components/layout/EnvSwitcher";
+import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
 import React, { useState, useEffect } from "react";
 
 const nav = [
@@ -28,7 +29,7 @@ const nav = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useUser();
-  const { org, needsOnboarding, loading: orgLoading } = useOrg();
+  const { org, orgs, needsOnboarding, loading: orgLoading } = useOrg();
   const { theme, setTheme } = useTheme();
   const { isTestnet } = useEnv();
   const router = useRouter();
@@ -68,9 +69,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-none truncate">VaultKey</p>
-          {org && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">{org.name}</p>
-          )}
         </div>
         {/* Close button — mobile only */}
         <button
@@ -80,6 +78,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <X className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Org switcher — shown when user has an org */}
+      {org && (
+        <div className="border-b border-sidebar-border pt-2 pb-1">
+          <OrgSwitcher />
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto no-scrollbar">
@@ -189,6 +194,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}>VK</span>
             </div>
             <span className="text-sm font-semibold truncate">VaultKey</span>
+            {org && (
+              <span className="text-xs text-muted-foreground truncate hidden xs:block">· {org.name}</span>
+            )}
           </div>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
