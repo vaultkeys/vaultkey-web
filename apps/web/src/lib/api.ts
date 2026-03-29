@@ -8,14 +8,16 @@ export class ApiError extends Error {
 async function req<T>(
   baseUrl: string,
   path: string,
-  opts: RequestInit & { token?: string } = {},
+  opts: RequestInit & { token?: string; apiKey?: string; apiSecret?: string } = {},
 ): Promise<T> {
-  const { token, ...init } = opts;
+  const { token, apiKey, apiSecret, ...init } = opts;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (apiKey) headers["X-API-Key"] = apiKey;
+  if (apiSecret) headers["X-API-Secret"] = apiSecret;
 
   const res = await fetch(`${baseUrl}${path}`, { ...init, headers });
   if (!res.ok) {
@@ -116,42 +118,44 @@ export function makeCloud(baseUrl: string) {
 // ── SDK endpoints (project API key) ──────────────────────────────────────────
 
 export function makeSDK(baseUrl: string) {
+  type Creds = { apiKey: string; apiSecret: string };
+
   return {
-    createWallet: (token: string, body: { user_id: string; chain_type: "evm" | "solana"; label?: string }) =>
-      req<Wallet>(baseUrl, "/sdk/wallets", { method: "POST", body: JSON.stringify(body), token }),
+    createWallet: (creds: Creds, body: { user_id: string; chain_type: "evm" | "solana"; label?: string }) =>
+      req<Wallet>(baseUrl, "/sdk/wallets", { method: "POST", body: JSON.stringify(body), ...creds }),
 
-    getWallet: (token: string, walletId: string) =>
-      req<Wallet>(baseUrl, `/sdk/wallets/${walletId}`, { token }),
+    getWallet: (creds: Creds, walletId: string) =>
+      req<Wallet>(baseUrl, `/sdk/wallets/${walletId}`, { ...creds }),
 
-    listUserWallets: (token: string, userId: string) =>
-      req<{ wallets: Wallet[] }>(baseUrl, `/sdk/users/${userId}/wallets`, { token }),
+    listUserWallets: (creds: Creds, userId: string) =>
+      req<{ wallets: Wallet[] }>(baseUrl, `/sdk/users/${userId}/wallets`, { ...creds }),
 
-    getBalance: (token: string, walletId: string, chainId?: string) => {
+    getBalance: (creds: Creds, walletId: string, chainId?: string) => {
       const qs = chainId ? `?chain_id=${chainId}` : "";
       return req<{ address: string; balance: string; unit: string; chain_id?: string }>(
-        baseUrl, `/sdk/wallets/${walletId}/balance${qs}`, { token },
+        baseUrl, `/sdk/wallets/${walletId}/balance${qs}`, { ...creds },
       );
     },
 
     stablecoinTransfer: (
-      token: string,
+      creds: Creds,
       walletId: string,
       chainType: "evm" | "solana",
       body: { token: string; to: string; amount: string; chain_id?: string; gasless?: boolean; idempotency_key?: string },
     ) => req<{ job_id: string; status: string }>(
       baseUrl, `/sdk/wallets/${walletId}/stablecoin/transfer/${chainType}`,
-      { method: "POST", body: JSON.stringify(body), token },
+      { method: "POST", body: JSON.stringify(body), ...creds },
     ),
 
-    stablecoinBalance: (token: string, walletId: string, chainType: "evm" | "solana", stablecoin: string, chainId?: string) => {
+    stablecoinBalance: (creds: Creds, walletId: string, chainType: "evm" | "solana", stablecoin: string, chainId?: string) => {
       const qs = new URLSearchParams({ token: stablecoin, ...(chainId ? { chain_id: chainId } : {}) }).toString();
       return req<{ address: string; token: string; symbol: string; balance: string; raw_balance: string; chain_id?: string }>(
-        baseUrl, `/sdk/wallets/${walletId}/stablecoin/balance/${chainType}?${qs}`, { token },
+        baseUrl, `/sdk/wallets/${walletId}/stablecoin/balance/${chainType}?${qs}`, { ...creds },
       );
     },
 
-    getJob: (token: string, jobId: string) =>
-      req<JobStatus>(baseUrl, `/sdk/jobs/${jobId}`, { token }),
+    getJob: (creds: Creds, jobId: string) =>
+      req<JobStatus>(baseUrl, `/sdk/jobs/${jobId}`, { ...creds }),
   };
 }
 

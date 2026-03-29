@@ -19,6 +19,7 @@ export default function TransfersPage() {
   const [walletId, setWalletId] = useState("");
   const [chainType, setChainType] = useState<"evm" | "solana">("evm");
   const [token, setToken] = useState<"usdc" | "usdt">("usdc");
+  const [apiSecret, setApiSecret] = useState("");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [chainId, setChainId] = useState("137");
@@ -30,10 +31,17 @@ export default function TransfersPage() {
   const [balance, setBalance] = useState<string | null>(null);
 
   const checkBalance = async () => {
-    if (!apiKey || !walletId) { toast.error("Enter API key and wallet ID first"); return; }
+    if (!apiKey || !apiSecret || !walletId) {
+      toast.error("Enter API key, API secret, and wallet ID first");
+      return;
+    }
     setBalanceLoading(true);
     try {
-      const res = await sdk.stablecoinBalance(apiKey, walletId, chainType, token, chainType === "evm" ? chainId : undefined);
+      const res = await sdk.stablecoinBalance(
+        { apiKey, apiSecret },
+        walletId, chainType, token,
+        chainType === "evm" ? chainId : undefined,
+      );
       setBalance(`${res.balance} ${res.symbol}`);
     } catch (e: any) {
       toast.error(e.message);
@@ -41,17 +49,20 @@ export default function TransfersPage() {
   };
 
   const submit = async () => {
-    if (!apiKey || !walletId || !to || !amount) { toast.error("Fill all required fields"); return; }
+    if (!apiKey || !apiSecret || !walletId || !to || !amount) {
+      toast.error("Fill all required fields");
+      return;
+    }
     setLoading(true);
     setResult(null);
     try {
-      const res = await sdk.stablecoinTransfer(apiKey, walletId, chainType, {
-        token, to, amount,
-        ...(chainType === "evm" ? { chain_id: chainId } : {}),
-        gasless,
-      });
+      const res = await sdk.stablecoinTransfer(
+        { apiKey, apiSecret },
+        walletId, chainType,
+        { token, to, amount, ...(chainType === "evm" ? { chain_id: chainId } : {}), gasless },
+      );
       setResult(res);
-      toast.success("Transfer queued — job ID copied");
+      toast.success("Transfer queued");
     } catch (e: any) {
       toast.error(e.message);
     } finally { setLoading(false); }
@@ -71,6 +82,16 @@ export default function TransfersPage() {
 
           <Field label="Project API key *">
             <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="vk_live_…" className={iCls} />
+          </Field>
+
+          <Field label="Project API secret *">
+            <input
+              value={apiSecret}
+              onChange={(e) => setApiSecret(e.target.value)}
+              placeholder="sk_…"
+              type="password"
+              className={iCls}
+            />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">

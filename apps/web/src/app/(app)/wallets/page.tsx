@@ -174,24 +174,32 @@ function ChainBadge({ chain }: { chain: string }) {
 }
 
 function CreateWalletModal({ onClose, onCreated }: { onClose: () => void; onCreated: (w: WalletType) => void }) {
-  const { getToken } = useAuth();
   const { sdk } = useApi();
   const [apiKey, setApiKey] = useState("");
+  const [apiSecret, setApiSecret] = useState("");
   const [userId, setUserId] = useState("");
   const [chain, setChain] = useState<"evm" | "solana">("evm");
   const [label, setLabel] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!apiKey.trim() || !userId.trim()) { toast.error("API key and user ID required"); return; }
+    if (!apiKey.trim() || !apiSecret.trim() || !userId.trim()) {
+      toast.error("API key, API secret, and user ID are required");
+      return;
+    }
     setLoading(true);
     try {
-      const wallet = await sdk.createWallet(apiKey, { user_id: userId, chain_type: chain, label: label || undefined });
+      const wallet = await sdk.createWallet(
+        { apiKey, apiSecret },
+        { user_id: userId, chain_type: chain, label: label || undefined },
+      );
       toast.success("Wallet created");
       onCreated(wallet);
     } catch (e: any) {
       toast.error(e.message);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -201,6 +209,9 @@ function CreateWalletModal({ onClose, onCreated }: { onClose: () => void; onCrea
         <div className="space-y-3">
           <Field label="Project API key">
             <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="vk_live_…" className={inputCls} />
+          </Field>
+          <Field label="Project API secret">
+            <input value={apiSecret} onChange={(e) => setApiSecret(e.target.value)} placeholder="sk_…" type="password" className={inputCls} />
           </Field>
           <Field label="User ID">
             <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="user_123" className={inputCls} />
