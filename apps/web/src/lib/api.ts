@@ -38,7 +38,7 @@ export interface OnboardingResponse { org_id: string; org_name: string; org_slug
 export interface Member { id: string; clerk_user_id: string; role: string; email: string; first_name: string; last_name: string; joined_at: string; }
 export interface Invite { id: string; org_id: string; email: string; token: string; role: string; created_by: string; expires_at: string; created_at: string; accepted_at?: string; }
 export interface ApiKey { id: string; name: string; key: string; active: boolean; last_used_at?: string; created_at: string; }
-export interface ApiKeyCreated { id: string; name: string; key: string; secret: string; created_at: string; }
+export interface ApiKeyCreated { id: string; name: string; key: string; secret: string; active: boolean; last_used_at?: string; created_at: string; }
 export interface Wallet { id: string; user_id: string; chain_type: string; address: string; label?: string; created_at: string; }
 export interface PaymentIntentRes { client_secret: string; payment_intent_id: string; base_credits: number; bonus_credits: number; total_credits: number; amount_cents: number; currency: string; }
 export interface StripePayment { id: string; amount_cents: number; currency: string; status: string; created_at: string; total_credits: number; }

@@ -111,7 +111,7 @@ export default function ApiKeysPage() {
                     <td className="px-4 py-3 font-medium">{k.name}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs text-muted-foreground">{k.key.slice(0, 20)}…</span>
+                        <span className="font-mono text-xs text-muted-foreground">{k.key.slice(0, 24)}…</span>
                         <CopyButton value={k.key} />
                       </div>
                     </td>
@@ -136,7 +136,7 @@ export default function ApiKeysPage() {
                   <div className="min-w-0">
                     <p className="font-medium text-sm">{k.name}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <span className="font-mono text-xs text-muted-foreground">{k.key.slice(0, 16)}…</span>
+                      <span className="font-mono text-xs text-muted-foreground">{k.key.slice(0, 24)}…</span>
                       <CopyButton value={k.key} />
                     </div>
                   </div>
@@ -159,7 +159,15 @@ export default function ApiKeysPage() {
           onClose={() => setShowCreate(false)}
           onCreated={(k) => {
             setJustCreated(k);
-            setKeys((p) => [{ ...k, active: true }, ...p]);
+            // Only push ApiKey-shaped data into the list — never include `secret`
+            setKeys((p) => [{
+              id: k.id,
+              name: k.name,
+              key: k.key,
+              active: true,
+              last_used_at: undefined,
+              created_at: k.created_at,
+            }, ...p]);
             setShowCreate(false);
           }}
           orgId={orgId!}
