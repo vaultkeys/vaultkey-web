@@ -80,7 +80,7 @@ export default function TeamPage() {
   const canManage = myRole === "owner" || myRole === "admin";
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <PageHeader
         title="Team"
         description="Manage members and pending invitations"
@@ -96,15 +96,12 @@ export default function TeamPage() {
         }
       />
 
-      {/* Testnet isolation notice */}
       {isTestnet && (
         <div className="mb-6 rounded-lg border border-yellow-500/25 bg-yellow-500/8 px-4 py-3 flex items-start gap-2.5">
           <FlaskConical className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Testnet team is separate from mainnet</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Members invited here won't automatically appear on mainnet. Switch to mainnet to manage your production team.
-            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">Members invited here won't automatically appear on mainnet.</p>
           </div>
         </div>
       )}
@@ -117,42 +114,85 @@ export default function TeamPage() {
         ) : members.length === 0 ? (
           <EmptyState icon={<Mail className="h-8 w-8" />} title="No members" />
         ) : (
-          <div className="rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  {["Member", "Role", "Joined", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((m) => {
-                  const isMe = m.clerk_user_id === user?.id;
-                  const isOwner = m.role === "owner";
-                  return (
-                    <tr key={m.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="font-medium">{m.first_name} {m.last_name} {isMe && <span className="text-xs text-muted-foreground">(you)</span>}</p>
-                          <p className="text-xs text-muted-foreground">{m.email}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    {["Member", "Role", "Joined", ""].map((h) => (
+                      <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((m) => {
+                    const isMe = m.clerk_user_id === user?.id;
+                    const isOwner = m.role === "owner";
+                    return (
+                      <tr key={m.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3">
+                          <div>
+                            <p className="font-medium">{m.first_name} {m.last_name} {isMe && <span className="text-xs text-muted-foreground">(you)</span>}</p>
+                            <p className="text-xs text-muted-foreground">{m.email}</p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {canManage && !isOwner && !isMe ? (
+                            <select
+                              value={m.role}
+                              onChange={(e) => changeRole(m.clerk_user_id, e.target.value)}
+                              className="rounded border border-input bg-background px-2 py-1 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-ring/30"
+                            >
+                              {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                          ) : (
+                            <RoleBadge role={m.role} />
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(m.joined_at)}</td>
+                        <td className="px-4 py-3 text-right">
+                          {canManage && !isOwner && !isMe && (
+                            <button
+                              onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
+                              className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                            >
+                              <UserMinus className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden space-y-2">
+              {members.map((m) => {
+                const isMe = m.clerk_user_id === user?.id;
+                const isOwner = m.role === "owner";
+                return (
+                  <div key={m.id} className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{m.first_name} {m.last_name} {isMe && <span className="text-xs text-muted-foreground">(you)</span>}</p>
+                        <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(m.joined_at)}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
                         {canManage && !isOwner && !isMe ? (
                           <select
                             value={m.role}
                             onChange={(e) => changeRole(m.clerk_user_id, e.target.value)}
-                            className="rounded border border-input bg-background px-2 py-1 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-ring/30"
+                            className="rounded border border-input bg-background px-2 py-1 text-xs font-mono focus:outline-none"
                           >
                             {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                           </select>
                         ) : (
                           <RoleBadge role={m.role} />
                         )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(m.joined_at)}</td>
-                      <td className="px-4 py-3 text-right">
                         {canManage && !isOwner && !isMe && (
                           <button
                             onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
@@ -161,13 +201,13 @@ export default function TeamPage() {
                             <UserMinus className="h-3.5 w-3.5" />
                           </button>
                         )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -175,7 +215,9 @@ export default function TeamPage() {
       {invites.length > 0 && (
         <div>
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">Pending invites ({invites.length})</p>
-          <div className="rounded-xl border border-border overflow-hidden">
+
+          {/* Desktop */}
+          <div className="hidden sm:block rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -192,10 +234,7 @@ export default function TeamPage() {
                     <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(inv.expires_at)}</td>
                     <td className="px-4 py-3 text-right">
                       {canManage && (
-                        <button
-                          onClick={() => revokeInvite(inv.token)}
-                          className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                        >
+                        <button onClick={() => revokeInvite(inv.token)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
                           <X className="h-3.5 w-3.5" />
                         </button>
                       )}
@@ -204,6 +243,26 @@ export default function TeamPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile */}
+          <div className="sm:hidden space-y-2">
+            {invites.map((inv) => (
+              <div key={inv.id} className="rounded-xl border border-border bg-card p-4 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate">{inv.email}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <RoleBadge role={inv.role} />
+                    <span className="text-xs text-muted-foreground">Expires {formatDate(inv.expires_at)}</span>
+                  </div>
+                </div>
+                {canManage && (
+                  <button onClick={() => revokeInvite(inv.token)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -240,18 +299,13 @@ function InviteModal({ onClose, onInvited, orgId }: { onClose: () => void; onInv
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-sm rounded-2xl border-2 border-border bg-popover p-6 shadow-xl">
         <h2 className="font-semibold text-base mb-4">Invite member</h2>
         <div className="space-y-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
-            <input
-              value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="colleague@company.com"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30"
-              autoFocus
-            />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="colleague@company.com" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30" autoFocus />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Role</label>

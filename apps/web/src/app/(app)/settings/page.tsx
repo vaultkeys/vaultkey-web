@@ -40,10 +40,7 @@ export default function SettingsPage() {
   };
 
   const deleteOrg = async () => {
-    if (!orgId || confirmName !== org?.name) {
-      toast.error("Organization name does not match");
-      return;
-    }
+    if (!orgId || confirmName !== org?.name) { toast.error("Organization name does not match"); return; }
     setDeleting(true);
     try {
       const token = await getToken();
@@ -58,36 +55,24 @@ export default function SettingsPage() {
   };
 
   if (!org) return (
-    <div className="p-8 animate-pulse space-y-4">
+    <div className="p-4 sm:p-8 animate-pulse space-y-4">
       <div className="h-7 w-32 bg-muted rounded" />
       <div className="h-48 bg-muted rounded-xl" />
     </div>
   );
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <PageHeader title="Settings" description="Manage your organization details" />
 
-      {/* General */}
-      <section className="rounded-xl border border-border bg-card p-6 mb-6">
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-6 mb-6">
         <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">General</p>
         <div className="space-y-4">
           <Field label="Organization name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={iCls}
-              placeholder="Acme Corp"
-            />
+            <input value={name} onChange={(e) => setName(e.target.value)} className={iCls} placeholder="Acme Corp" />
           </Field>
           <Field label="Billing email">
-            <input
-              value={billingEmail}
-              onChange={(e) => setBillingEmail(e.target.value)}
-              className={iCls}
-              placeholder="billing@company.com"
-              type="email"
-            />
+            <input value={billingEmail} onChange={(e) => setBillingEmail(e.target.value)} className={iCls} placeholder="billing@company.com" type="email" />
           </Field>
           <Field label="Slug">
             <input value={org.slug} disabled className={`${iCls} opacity-50 cursor-not-allowed`} />
@@ -95,18 +80,13 @@ export default function SettingsPage() {
           </Field>
         </div>
         <div className="mt-5 flex justify-end">
-          <button
-            onClick={saveOrg}
-            disabled={saving}
-            className="px-4 py-2 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
+          <button onClick={saveOrg} disabled={saving} className="px-4 py-2 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
             {saving ? "Saving…" : "Save changes"}
           </button>
         </div>
       </section>
 
-      {/* Read-only info */}
-      <section className="rounded-xl border border-border bg-card p-6 mb-6">
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-6 mb-6">
         <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Organization info</p>
         <div className="space-y-3 text-sm">
           <Row label="Org ID" value={org.id} mono />
@@ -116,19 +96,13 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* Danger zone */}
-      <section className="rounded-xl border border-red-500/30 bg-red-500/5 p-6">
+      <section className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 sm:p-6">
         <p className="text-xs font-mono uppercase tracking-wider text-red-500 mb-2">Danger zone</p>
         <p className="text-sm text-muted-foreground mb-4">
           Deleting the organization is permanent and cannot be undone. All API keys, members, and configuration will be removed.
         </p>
         <Field label={`Type "${org.name}" to confirm`}>
-          <input
-            value={confirmName}
-            onChange={(e) => setConfirmName(e.target.value)}
-            className={`${iCls} border-red-500/30 focus:ring-red-500/20`}
-            placeholder={org.name}
-          />
+          <input value={confirmName} onChange={(e) => setConfirmName(e.target.value)} className={`${iCls} border-red-500/30 focus:ring-red-500/20`} placeholder={org.name} />
         </Field>
         <div className="mt-4">
           <button
@@ -155,9 +129,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-1.5 border-b border-border last:border-0">
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-4 py-1.5 border-b border-border last:border-0">
       <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className={mono ? "font-mono text-xs text-right break-all" : "text-right"}>{value}</span>
+      <span className={mono ? "font-mono text-xs break-all" : ""}>{value}</span>
     </div>
   );
 }

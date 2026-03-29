@@ -42,12 +42,10 @@ export default function DashboardPage() {
   if (orgLoading) return <DashSkeleton />;
 
   if (!org) return (
-    <div className="p-8">
-      <div className="rounded-xl border border-border bg-card p-8 text-center max-w-md mx-auto mt-16">
+    <div className="p-4 sm:p-8">
+      <div className="rounded-xl border border-border bg-card p-8 text-center max-w-md mx-auto mt-8 sm:mt-16">
         <h2 className="font-semibold text-lg">Welcome to VaultKey</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Complete onboarding to get started.
-        </p>
+        <p className="text-sm text-muted-foreground mt-2">Complete onboarding to get started.</p>
         <a href="/onboarding" className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
           Start onboarding
         </a>
@@ -62,13 +60,13 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <PageHeader
         title={`${org.name}`}
         description="Last 30 days · stablecoin infrastructure overview"
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-8">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 mb-6 sm:mb-8">
         <StatCard
           label="Credits balance"
           value={formatCredits(balance)}
@@ -95,9 +93,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Usage by operation */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Credits by operation</p>
           {loading ? (
             <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>
@@ -106,8 +103,8 @@ export default function DashboardPage() {
           ) : (
             <ResponsiveContainer width="100%" height={192}>
               <BarChart data={chartData} barSize={24}>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={36} />
                 <Tooltip
                   contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
                   cursor={{ fill: "hsl(var(--accent))" }}
@@ -122,8 +119,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Top operations table */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Top operations</p>
           {loading ? (
             <div className="space-y-2">
@@ -136,11 +132,11 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-1">
               {(stats?.by_operation ?? []).slice(0, 7).map((op) => (
-                <div key={op.operation} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <span className="text-sm font-mono text-muted-foreground">{operationLabel(op.operation)}</span>
-                  <div className="flex items-center gap-4 text-xs text-right">
-                    <span className="text-muted-foreground">{op.count.toLocaleString()} ops</span>
-                    <span className="font-medium w-16">{formatCredits(op.credits_consumed)} cr</span>
+                <div key={op.operation} className="flex items-center justify-between py-2 border-b border-border last:border-0 gap-2">
+                  <span className="text-xs sm:text-sm font-mono text-muted-foreground truncate">{operationLabel(op.operation)}</span>
+                  <div className="flex items-center gap-2 sm:gap-4 text-xs text-right shrink-0">
+                    <span className="text-muted-foreground hidden sm:inline">{op.count.toLocaleString()} ops</span>
+                    <span className="font-medium">{formatCredits(op.credits_consumed)} cr</span>
                   </div>
                 </div>
               ))}
@@ -154,12 +150,12 @@ export default function DashboardPage() {
 
 function DashSkeleton() {
   return (
-    <div className="p-8 space-y-6 animate-pulse">
+    <div className="p-4 sm:p-8 space-y-6 animate-pulse">
       <div className="h-7 w-48 bg-muted rounded" />
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-xl" />)}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="h-64 bg-muted rounded-xl" />
         <div className="h-64 bg-muted rounded-xl" />
       </div>

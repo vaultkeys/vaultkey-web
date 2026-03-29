@@ -19,12 +19,9 @@ export default function WalletsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [apiKey, setApiKey] = useState("");
 
   useEffect(() => {
     if (!org?.project_id) return;
-    // Wallets are per-project; to list them we need the project API key
-    // This page lets the user enter their API key to query wallets for a user_id
     setLoading(false);
   }, [org]);
 
@@ -33,7 +30,7 @@ export default function WalletsPage() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <PageHeader
         title="Wallets"
         description="EVM and Solana wallets managed by your project"
@@ -43,18 +40,16 @@ export default function WalletsPage() {
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Create wallet
+            <span>Create wallet</span>
           </button>
         }
       />
 
-      {/* API key notice */}
       <div className="mb-6 rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
         Wallet queries use your <strong className="text-foreground font-mono">project API key</strong>.
         Go to <a href="/api-keys" className="underline text-foreground">API Keys</a> to get one, then use the SDK directly or the test client.
       </div>
 
-      {/* Search */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
@@ -97,44 +92,84 @@ export default function WalletsPage() {
 
 function WalletTable({ wallets }: { wallets: WalletType[] }) {
   return (
-    <div className="rounded-xl border border-border overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border bg-muted/30">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Address</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Chain</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">User ID</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Label</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {wallets.map((w) => (
-            <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-xs">{shortAddress(w.address)}</span>
-                  <CopyButton value={w.address} />
-                </div>
-              </td>
-              <td className="px-4 py-3">
-                <span className={cn(
-                  "inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono",
-                  w.chain_type === "evm"
-                    ? "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400",
-                )}>
-                  {w.chain_type.toUpperCase()}
-                </span>
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{w.user_id}</td>
-              <td className="px-4 py-3 text-muted-foreground">{w.label ?? "—"}</td>
-              <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(w.created_at)}</td>
+    <>
+      {/* Desktop table */}
+      <div className="hidden sm:block rounded-xl border border-border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/30">
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Address</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Chain</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">User ID</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Label</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">Created</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {wallets.map((w) => (
+              <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-xs">{shortAddress(w.address)}</span>
+                    <CopyButton value={w.address} />
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <ChainBadge chain={w.chain_type} />
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{w.user_id}</td>
+                <td className="px-4 py-3 text-muted-foreground">{w.label ?? "—"}</td>
+                <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(w.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="sm:hidden space-y-2">
+        {wallets.map((w) => (
+          <div key={w.id} className="rounded-xl border border-border bg-card p-4 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-mono text-xs truncate">{shortAddress(w.address)}</span>
+                <CopyButton value={w.address} />
+              </div>
+              <ChainBadge chain={w.chain_type} />
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div className="flex justify-between">
+                <span>User ID</span>
+                <span className="font-mono">{w.user_id}</span>
+              </div>
+              {w.label && (
+                <div className="flex justify-between">
+                  <span>Label</span>
+                  <span>{w.label}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Created</span>
+                <span>{formatDate(w.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ChainBadge({ chain }: { chain: string }) {
+  return (
+    <span className={cn(
+      "inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono",
+      chain === "evm"
+        ? "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+        : "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    )}>
+      {chain.toUpperCase()}
+    </span>
   );
 }
 
@@ -160,7 +195,7 @@ function CreateWalletModal({ onClose, onCreated }: { onClose: () => void; onCrea
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-2xl border-2 border-border bg-popover p-6 shadow-xl">
         <h2 className="font-semibold text-base mb-4">Create wallet</h2>
         <div className="space-y-3">

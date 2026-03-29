@@ -15,7 +15,6 @@ export default function TransfersPage() {
   const { getToken } = useAuth();
   const { sdk } = useApi();
 
-  // Form state
   const [apiKey, setApiKey] = useState("");
   const [walletId, setWalletId] = useState("");
   const [chainType, setChainType] = useState<"evm" | "solana">("evm");
@@ -27,7 +26,6 @@ export default function TransfersPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TransferResult>(null);
 
-  // Balance check
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
 
@@ -43,17 +41,12 @@ export default function TransfersPage() {
   };
 
   const submit = async () => {
-    if (!apiKey || !walletId || !to || !amount) {
-      toast.error("Fill all required fields");
-      return;
-    }
+    if (!apiKey || !walletId || !to || !amount) { toast.error("Fill all required fields"); return; }
     setLoading(true);
     setResult(null);
     try {
       const res = await sdk.stablecoinTransfer(apiKey, walletId, chainType, {
-        token,
-        to,
-        amount,
+        token, to, amount,
         ...(chainType === "evm" ? { chain_id: chainId } : {}),
         gasless,
       });
@@ -65,7 +58,7 @@ export default function TransfersPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <PageHeader
         title="Stablecoin Transfers"
         description="Send USDC or USDT from a custodial wallet. Returns a job ID — poll for result."
@@ -73,7 +66,7 @@ export default function TransfersPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Transfer form */}
-        <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4">
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Transfer parameters</p>
 
           <Field label="Project API key *">
@@ -111,8 +104,8 @@ export default function TransfersPage() {
           <Field label="Wallet ID *">
             <div className="flex gap-2">
               <input value={walletId} onChange={(e) => { setWalletId(e.target.value); setBalance(null); }} placeholder="wallet_…" className={iCls} />
-              <button onClick={checkBalance} disabled={balanceLoading} className="px-3 py-2 text-xs rounded-md border border-border hover:bg-accent transition-colors whitespace-nowrap disabled:opacity-50">
-                {balanceLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Check balance"}
+              <button onClick={checkBalance} disabled={balanceLoading} className="px-3 py-2 text-xs rounded-md border border-border hover:bg-accent transition-colors whitespace-nowrap disabled:opacity-50 shrink-0">
+                {balanceLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Check"}
               </button>
             </div>
             {balance && (
@@ -131,9 +124,7 @@ export default function TransfersPage() {
           {chainType === "evm" && (
             <div className="flex items-center gap-2">
               <input id="gasless" type="checkbox" checked={gasless} onChange={(e) => setGasless(e.target.checked)} className="rounded border-input" />
-              <label htmlFor="gasless" className="text-sm text-muted-foreground cursor-pointer">
-                Gasless (relayer pays gas)
-              </label>
+              <label htmlFor="gasless" className="text-sm text-muted-foreground cursor-pointer">Gasless (relayer pays gas)</label>
             </div>
           )}
 
@@ -148,15 +139,14 @@ export default function TransfersPage() {
 
         {/* Result + info */}
         <div className="space-y-4">
-          {/* Result card */}
           {result ? (
-            <div className="rounded-xl border border-border bg-card p-6">
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
               <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">Transfer queued</p>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Job ID</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-xs">{result.job_id}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground shrink-0">Job ID</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-mono text-xs truncate">{result.job_id}</span>
                     <CopyButton value={result.job_id} />
                   </div>
                 </div>
@@ -176,8 +166,7 @@ export default function TransfersPage() {
             </div>
           )}
 
-          {/* How it works */}
-          <div className="rounded-xl border border-border bg-card p-6">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
             <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">How it works</p>
             <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
               <li>Transfer request is queued immediately (HTTP 202)</li>
@@ -185,7 +174,7 @@ export default function TransfersPage() {
               <li>Transaction is broadcast to the chain</li>
               <li>Result delivered to your webhook + available via job poll</li>
             </ol>
-            <div className="mt-4 rounded-lg bg-muted/40 p-3 font-mono text-xs text-muted-foreground">
+            <div className="mt-4 rounded-lg bg-muted/40 p-3 font-mono text-xs text-muted-foreground break-all">
               POST /sdk/wallets/{"{walletId}"}/stablecoin/transfer/{"{chainType}"}
             </div>
           </div>
