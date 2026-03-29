@@ -50,6 +50,13 @@ export interface DailyUsage { date: string; operation: string; count: number; cr
 export interface UsageStats { org_id: string; period: { start: string; end: string }; total_credits_consumed: number; total_operations: number; current_balance: number; by_operation: OperationStat[]; daily?: DailyUsage[]; }
 export interface JobStatus { id: string; status: string; result?: unknown; error?: string; created_at: string; updated_at: string; }
 
+// ── Relayer (Fee Payer) types ─────────────────────────────────────────────────
+export interface Relayer { id: string; wallet_id: string; address: string; chain_type: string; chain_id?: string; min_balance_alert: string; active: boolean; }
+export interface RelayerInfo { id: string; address: string; chain_type: string; chain_id?: string; balance: string; unit: string; min_balance_alert: string; active: boolean; status: string; }
+
+// ── Master Wallet (Collection Wallet) types ───────────────────────────────────
+export interface MasterWallet { id: string; wallet_id: string; address: string; chain_type: string; chain_id?: string; threshold: string; schedule_hours: number; active: boolean; last_sweep_at?: string; created_at: string; }
+
 // ── Cloud endpoints (Clerk JWT bearer) ────────────────────────────────────────
 
 export function makeCloud(baseUrl: string) {
@@ -112,6 +119,36 @@ export function makeCloud(baseUrl: string) {
 
     getCredits: (token: string, orgId: string) =>
       req<{ org_id: string; balance: number }>(baseUrl, `/cloud/organizations/${orgId}/credits`, { token }),
+
+    // ── Relayer (Fee Payer) ──────────────────────────────────────────────────
+    registerRelayer: (token: string, orgId: string, body: { chain_type: "evm" | "solana"; chain_id?: string; min_balance_alert?: string }) =>
+      req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayer`, { method: "POST", body: JSON.stringify(body), token }),
+
+    getRelayer: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
+      const qs = new URLSearchParams(params as Record<string, string>).toString();
+      return req<RelayerInfo>(baseUrl, `/cloud/organizations/${orgId}/relayer?${qs}`, { token });
+    },
+
+    listRelayers: (token: string, orgId: string) =>
+      req<{ relayers: Relayer[] }>(baseUrl, `/cloud/organizations/${orgId}/relayers`, { token }),
+
+    deactivateRelayer: (token: string, orgId: string, relayerId: string) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}/relayer/${relayerId}`, { method: "DELETE", token }),
+
+    // ── Master Wallet (Collection Wallet) ────────────────────────────────────
+    provisionMasterWallet: (token: string, orgId: string, body: { chain_type: "evm" | "solana"; chain_id?: string; threshold?: string; schedule_hours?: number }) =>
+      req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet`, { method: "POST", body: JSON.stringify(body), token }),
+
+    getMasterWallet: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
+      const qs = new URLSearchParams(params as Record<string, string>).toString();
+      return req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet?${qs}`, { token });
+    },
+
+    listMasterWallets: (token: string, orgId: string) =>
+      req<{ configs: MasterWallet[] }>(baseUrl, `/cloud/organizations/${orgId}/master-wallets`, { token }),
+
+    updateMasterWallet: (token: string, orgId: string, configId: string, body: { threshold?: string; schedule_hours?: number; active?: boolean }) =>
+      req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet/${configId}`, { method: "PATCH", body: JSON.stringify(body), token }),
   };
 }
 
@@ -158,9 +195,3 @@ export function makeSDK(baseUrl: string) {
       req<JobStatus>(baseUrl, `/sdk/jobs/${jobId}`, { ...creds }),
   };
 }
-
-// ── Legacy singleton (backward-compat, uses NEXT_PUBLIC_BACKEND_URL) ──────────
-// Still used by pages that haven't been migrated to useApi() yet.
-// const _legacyBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
-// export const cloud = makeCloud(_legacyBase);
-// export const sdk = makeSDK(_legacyBase);

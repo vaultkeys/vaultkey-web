@@ -6,7 +6,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, KeyRound,
-  Users, CreditCard, Settings, ShieldCheck,
+  Users, CreditCard, Settings, Fuel, Warehouse,
   Sun, Moon, ChevronRight, Menu, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,13 +17,15 @@ import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
 import React, { useState, useEffect } from "react";
 
 const nav = [
-  { label: "Dashboard",   href: "/dashboard",    icon: LayoutDashboard },
-  { label: "Wallets",     href: "/wallets",       icon: Wallet },
-  { label: "Transfers",   href: "/transfers",     icon: ArrowLeftRight },
-  { label: "API Keys",    href: "/api-keys",      icon: KeyRound },
-  { label: "Team",        href: "/team",          icon: Users },
-  { label: "Billing",     href: "/billing",       icon: CreditCard },
-  { label: "Settings",    href: "/settings",      icon: Settings },
+  { label: "Dashboard",         href: "/dashboard",          icon: LayoutDashboard },
+  { label: "Wallets",           href: "/wallets",            icon: Wallet },
+  { label: "Transfers",         href: "/transfers",          icon: ArrowLeftRight },
+  { label: "Fee Payers",        href: "/relayers",           icon: Fuel },
+  { label: "Collection Wallets", href: "/master-wallets",    icon: Warehouse },
+  { label: "API Keys",          href: "/api-keys",           icon: KeyRound },
+  { label: "Team",              href: "/team",               icon: Users },
+  { label: "Billing",           href: "/billing",            icon: CreditCard },
+  { label: "Settings",          href: "/settings",           icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -112,22 +114,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Environment switcher */}
       <EnvSwitcher />
-
-      {/* Admin link */}
-      {/* <div className="px-2 pb-2 border-t border-sidebar-border pt-2 shrink-0">
-        <Link
-          href="/admin"
-          className={cn(
-            "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors",
-            pathname.startsWith("/admin")
-              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-          )}
-        >
-          <ShieldCheck className="h-4 w-4 shrink-0" />
-          <span>Admin</span>
-        </Link>
-      </div> */}
 
       {/* User + theme */}
       <div className="px-3 py-3 border-t border-sidebar-border flex items-center gap-2 shrink-0">
