@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <EnvSwitcher />
 
       {/* Admin link */}
-      <div className="px-2 pb-2 border-t border-sidebar-border pt-2 shrink-0">
+      {/* <div className="px-2 pb-2 border-t border-sidebar-border pt-2 shrink-0">
         <Link
           href="/admin"
           className={cn(
@@ -127,7 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ShieldCheck className="h-4 w-4 shrink-0" />
           <span>Admin</span>
         </Link>
-      </div>
+      </div> */}
 
       {/* User + theme */}
       <div className="px-3 py-3 border-t border-sidebar-border flex items-center gap-2 shrink-0">
