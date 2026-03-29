@@ -51,11 +51,36 @@ export interface UsageStats { org_id: string; period: { start: string; end: stri
 export interface JobStatus { id: string; status: string; result?: unknown; error?: string; created_at: string; updated_at: string; }
 
 // ── Relayer (Fee Payer) types ─────────────────────────────────────────────────
-export interface Relayer { id: string; wallet_id: string; address: string; chain_type: string; chain_id?: string; min_balance_alert: string; active: boolean; }
-export interface RelayerInfo { id: string; address: string; chain_type: string; chain_id?: string; balance: string; unit: string; min_balance_alert: string; active: boolean; status: string; }
+export interface Relayer {
+  id: string;
+  wallet_id: string;
+  address: string;
+  chain_type: string;
+  chain_id?: string;
+  min_balance_alert: string;
+  active: boolean;
+}
+export interface RelayerInfo {
+  wallet_id: string;
+  address: string;
+  chain_type: string;
+  chain_id?: string;
+  balance: string;
+  unit: string;
+  healthy: boolean;
+}
 
 // ── Master Wallet (Collection Wallet) types ───────────────────────────────────
-export interface MasterWallet { id: string; wallet_id: string; address: string; chain_type: string; chain_id?: string; threshold: string; schedule_hours: number; active: boolean; last_sweep_at?: string; created_at: string; }
+// Mirrors Go's sweepConfigResponse struct exactly.
+export interface MasterWallet {
+  id: string;
+  chain_type: string;
+  chain_id?: string;
+  master_wallet_id: string;  // the wallet ID
+  master_address: string;    // the wallet address
+  dust_threshold: string;    // min balance before sweep triggers
+  enabled: boolean;          // whether auto-sweep is active
+}
 
 // ── Cloud endpoints (Clerk JWT bearer) ────────────────────────────────────────
 
@@ -121,7 +146,11 @@ export function makeCloud(baseUrl: string) {
       req<{ org_id: string; balance: number }>(baseUrl, `/cloud/organizations/${orgId}/credits`, { token }),
 
     // ── Relayer (Fee Payer) ──────────────────────────────────────────────────
-    registerRelayer: (token: string, orgId: string, body: { chain_type: "evm" | "solana"; chain_id?: string; min_balance_alert?: string }) =>
+    registerRelayer: (
+      token: string,
+      orgId: string,
+      body: { chain_type: "evm" | "solana"; chain_id?: string; min_balance_alert?: string },
+    ) =>
       req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayer`, { method: "POST", body: JSON.stringify(body), token }),
 
     getRelayer: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
@@ -136,7 +165,12 @@ export function makeCloud(baseUrl: string) {
       req<void>(baseUrl, `/cloud/organizations/${orgId}/relayer/${relayerId}`, { method: "DELETE", token }),
 
     // ── Master Wallet (Collection Wallet) ────────────────────────────────────
-    provisionMasterWallet: (token: string, orgId: string, body: { chain_type: "evm" | "solana"; chain_id?: string; threshold?: string; schedule_hours?: number }) =>
+    // Body fields match Go's provisionMasterWalletRequest exactly.
+    provisionMasterWallet: (
+      token: string,
+      orgId: string,
+      body: { chain_type: "evm" | "solana"; chain_id?: string; dust_threshold?: string },
+    ) =>
       req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet`, { method: "POST", body: JSON.stringify(body), token }),
 
     getMasterWallet: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
@@ -144,11 +178,18 @@ export function makeCloud(baseUrl: string) {
       return req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet?${qs}`, { token });
     },
 
+    // Response key matches Go: { master_wallets: [...] }
     listMasterWallets: (token: string, orgId: string) =>
-      req<{ configs: MasterWallet[] }>(baseUrl, `/cloud/organizations/${orgId}/master-wallets`, { token }),
+      req<{ master_wallets: MasterWallet[] }>(baseUrl, `/cloud/organizations/${orgId}/master-wallets`, { token }),
 
-    updateMasterWallet: (token: string, orgId: string, configId: string, body: { threshold?: string; schedule_hours?: number; active?: boolean }) =>
-      req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet/${configId}`, { method: "PATCH", body: JSON.stringify(body), token }),
+    // Body fields match Go's updateSweepConfigRequest exactly.
+    updateMasterWallet: (
+      token: string,
+      orgId: string,
+      configId: string,
+      body: { dust_threshold?: string; enabled?: boolean },
+    ) =>
+      req<void>(baseUrl, `/cloud/organizations/${orgId}/master-wallet/${configId}`, { method: "PATCH", body: JSON.stringify(body), token }),
   };
 }
 

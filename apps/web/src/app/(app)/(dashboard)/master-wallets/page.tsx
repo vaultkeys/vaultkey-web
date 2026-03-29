@@ -26,8 +26,8 @@ export default function MasterWalletsPage() {
     try {
       const token = await getToken();
       if (!token) return;
-      const { configs } = await cloud.listMasterWallets(token, orgId);
-      setWallets(configs);
+      const { master_wallets } = await cloud.listMasterWallets(token, orgId);
+      setWallets(master_wallets);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -61,7 +61,7 @@ export default function MasterWalletsPage() {
           <p className="font-medium text-foreground mb-1">What are collection wallets?</p>
           <p>
             Collection wallets (also called master wallets) automatically consolidate funds from your users' wallets
-            into a central treasury. When a user wallet balance exceeds the threshold, VaultKey
+            into a central treasury. When a user wallet balance exceeds the dust threshold, VaultKey
             triggers a sweep transaction to move funds to your collection wallet. This is useful for
             payment processors, exchanges, and platforms that need to aggregate incoming payments.
           </p>
@@ -91,7 +91,7 @@ export default function MasterWalletsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  {["Address", "Chain", "Threshold", "Schedule", "Status", "Last sweep", ""].map((h) => (
+                  {["Address", "Chain", "Dust threshold", "Status", ""].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground font-mono text-xs uppercase tracking-wider">
                       {h}
                     </th>
@@ -103,22 +103,18 @@ export default function MasterWalletsPage() {
                   <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs">{shortAddress(w.address)}</span>
-                        <CopyButton value={w.address} />
+                        <span className="font-mono text-xs">{shortAddress(w.master_address)}</span>
+                        <CopyButton value={w.master_address} />
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <ChainBadge chain={w.chain_type} chainId={w.chain_id} />
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{w.threshold}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      Every {w.schedule_hours}h
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      {w.dust_threshold === "0" ? "Always sweep" : w.dust_threshold}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge active={w.active} />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {w.last_sweep_at ? formatDate(w.last_sweep_at) : "Never"}
+                      <StatusBadge enabled={w.enabled} />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -140,10 +136,10 @@ export default function MasterWalletsPage() {
               <div key={w.id} className="rounded-xl border border-border bg-card p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="font-mono text-xs truncate">{shortAddress(w.address)}</span>
-                    <CopyButton value={w.address} />
+                    <span className="font-mono text-xs truncate">{shortAddress(w.master_address)}</span>
+                    <CopyButton value={w.master_address} />
                   </div>
-                  <StatusBadge active={w.active} />
+                  <StatusBadge enabled={w.enabled} />
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <div className="flex justify-between">
@@ -151,16 +147,10 @@ export default function MasterWalletsPage() {
                     <ChainBadge chain={w.chain_type} chainId={w.chain_id} />
                   </div>
                   <div className="flex justify-between">
-                    <span>Threshold</span>
-                    <span className="font-mono">{w.threshold}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Schedule</span>
-                    <span>Every {w.schedule_hours}h</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Last sweep</span>
-                    <span>{w.last_sweep_at ? formatDate(w.last_sweep_at) : "Never"}</span>
+                    <span>Dust threshold</span>
+                    <span className="font-mono">
+                      {w.dust_threshold === "0" ? "Always sweep" : w.dust_threshold}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -217,17 +207,17 @@ function ChainBadge({ chain, chainId }: { chain: string; chainId?: string }) {
   );
 }
 
-function StatusBadge({ active }: { active: boolean }) {
+function StatusBadge({ enabled }: { enabled: boolean }) {
   return (
     <span
       className={cn(
         "inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium",
-        active
+        enabled
           ? "border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400"
           : "border-muted-foreground/20 bg-muted/40 text-muted-foreground"
       )}
     >
-      {active ? "Active" : "Paused"}
+      {enabled ? "Active" : "Paused"}
     </span>
   );
 }
@@ -245,17 +235,12 @@ function CreateWalletModal({
   const { cloud } = useApi();
   const [chainType, setChainType] = useState<"evm" | "solana">("evm");
   const [chainId, setChainId] = useState("137");
-  const [threshold, setThreshold] = useState("100");
-  const [scheduleHours, setScheduleHours] = useState(24);
+  const [dustThreshold, setDustThreshold] = useState("0");
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (chainType === "evm" && !chainId) {
       toast.error("Chain ID is required for EVM collection wallets");
-      return;
-    }
-    if (!threshold || parseFloat(threshold) <= 0) {
-      toast.error("Threshold must be greater than 0");
       return;
     }
     setLoading(true);
@@ -265,8 +250,7 @@ function CreateWalletModal({
       const wallet = await cloud.provisionMasterWallet(token, orgId, {
         chain_type: chainType,
         chain_id: chainType === "evm" ? chainId : undefined,
-        threshold,
-        schedule_hours: scheduleHours,
+        dust_threshold: dustThreshold,
       });
       toast.success("Collection wallet created");
       onCreated(wallet);
@@ -309,32 +293,16 @@ function CreateWalletModal({
             </Field>
           )}
 
-          <Field label="Sweep threshold (USDC)">
+          <Field label="Dust threshold">
             <input
-              value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
-              placeholder="100"
-              type="number"
-              step="1"
-              min="1"
+              value={dustThreshold}
+              onChange={(e) => setDustThreshold(e.target.value)}
+              placeholder="0"
+              type="text"
               className={inputCls}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Sweep when user wallet balance exceeds this amount
-            </p>
-          </Field>
-
-          <Field label="Check interval (hours)">
-            <input
-              value={scheduleHours}
-              onChange={(e) => setScheduleHours(parseInt(e.target.value) || 24)}
-              type="number"
-              step="1"
-              min="1"
-              className={inputCls}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              How often to check for wallets ready to sweep
+              Minimum balance before a sweep triggers. Set to "0" to always sweep.
             </p>
           </Field>
         </div>
@@ -372,27 +340,23 @@ function EditWalletModal({
 }) {
   const { getToken } = useAuth();
   const { cloud } = useApi();
-  const [threshold, setThreshold] = useState(wallet.threshold);
-  const [scheduleHours, setScheduleHours] = useState(wallet.schedule_hours);
-  const [active, setActive] = useState(wallet.active);
+  const [dustThreshold, setDustThreshold] = useState(wallet.dust_threshold);
+  const [enabled, setEnabled] = useState(wallet.enabled);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!threshold || parseFloat(threshold) <= 0) {
-      toast.error("Threshold must be greater than 0");
-      return;
-    }
     setLoading(true);
     try {
       const token = await getToken();
       if (!token) return;
-      const updated = await cloud.updateMasterWallet(token, orgId, wallet.id, {
-        threshold,
-        schedule_hours: scheduleHours,
-        active,
+      // Backend returns { status: "updated" } not the updated object,
+      // so we merge changes locally.
+      await cloud.updateMasterWallet(token, orgId, wallet.id, {
+        dust_threshold: dustThreshold,
+        enabled,
       });
       toast.success("Collection wallet updated");
-      onUpdated(updated);
+      onUpdated({ ...wallet, dust_threshold: dustThreshold, enabled });
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -404,39 +368,29 @@ function EditWalletModal({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-2xl border-2 border-border bg-popover p-6 shadow-xl">
         <h2 className="font-semibold text-base mb-1">Configure collection wallet</h2>
-        <p className="text-xs text-muted-foreground mb-4 font-mono">{shortAddress(wallet.address)}</p>
+        <p className="text-xs text-muted-foreground mb-4 font-mono">{shortAddress(wallet.master_address)}</p>
         <div className="space-y-3">
-          <Field label="Sweep threshold (USDC)">
+          <Field label="Dust threshold">
             <input
-              value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
-              type="number"
-              step="1"
-              min="1"
+              value={dustThreshold}
+              onChange={(e) => setDustThreshold(e.target.value)}
+              type="text"
               className={inputCls}
             />
-          </Field>
-
-          <Field label="Check interval (hours)">
-            <input
-              value={scheduleHours}
-              onChange={(e) => setScheduleHours(parseInt(e.target.value) || 24)}
-              type="number"
-              step="1"
-              min="1"
-              className={inputCls}
-            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Minimum balance before a sweep triggers. Set to "0" to always sweep.
+            </p>
           </Field>
 
           <div className="flex items-center gap-2 pt-1">
             <input
-              id="active"
+              id="enabled"
               type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
+              checked={enabled}
+              onChange={(e) => setEnabled(e.target.checked)}
               className="rounded border-input"
             />
-            <label htmlFor="active" className="text-sm text-muted-foreground cursor-pointer">
+            <label htmlFor="enabled" className="text-sm text-muted-foreground cursor-pointer">
               Active (sweep automatically)
             </label>
           </div>
