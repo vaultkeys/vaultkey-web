@@ -36,6 +36,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { isTestnet } = useEnv();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+
+  useEffect(() => setMounted(true), []);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -126,7 +130,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
-          {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          {mounted
+            ? theme === "dark"
+              ? <Sun className="h-3.5 w-3.5" />
+              : <Moon className="h-3.5 w-3.5" />
+            : <span className="h-3.5 w-3.5 block" />
+          }
         </button>
       </div>
     </>
@@ -188,7 +197,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {mounted
+              ? theme === "dark"
+                ? <Sun className="h-4 w-4" />
+                : <Moon className="h-4 w-4" />
+              : <span className="h-4 w-4 block" />
+            }
           </button>
         </header>
 

@@ -33,7 +33,7 @@ const OrgContext = createContext<OrgCtx>({
 
 export function OrgProvider({ children }: { children: React.ReactNode }) {
   const { getToken, userId } = useAuth();
-  const { baseUrl, env } = useEnv();
+  const { baseUrl, env, hydrated } = useEnv();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,11 +93,12 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
 
   // Re-fetch whenever the environment switches
   useEffect(() => {
+    if (!hydrated) return;
     setOrg(null);
     setOrgs([]);
     setLoading(true);
     refetch();
-  }, [env]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [env, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <OrgContext.Provider value={{ orgs, org, orgId: org?.id ?? null, loading, needsOnboarding, setActiveOrg, refetch }}>
