@@ -11,6 +11,7 @@ import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RoleBadge } from "@/components/shared/RoleBadge";
+import { LoadMore } from "@/components/shared/LoadMore";
 import { formatDate } from "@/lib/utils";
 import React from "react";
 
@@ -22,8 +23,17 @@ export default function TeamPage() {
   const { orgId } = useOrg();
   const { isTestnet } = useEnv();
   const { cloud } = useApi();
+
   const [members, setMembers] = useState<Member[]>([]);
+  const [membersCursor, setMembersCursor] = useState<string | null>(null);
+  const [membersHasMore, setMembersHasMore] = useState(false);
+  const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
+
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [invitesCursor, setInvitesCursor] = useState<string | null>(null);
+  const [invitesHasMore, setInvitesHasMore] = useState(false);
+  const [loadingMoreInvites, setLoadingMoreInvites] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
 
@@ -37,7 +47,15 @@ export default function TeamPage() {
         cloud.listInvites(token, orgId),
       ]);
       setMembers(mRes.members);
-      setInvites(iRes.invites.filter((i) => !i.accepted_at));
+      setMembersCursor(mRes.next_cursor);
+      setMembersHasMore(mRes.has_more);
+
+      const pending = iRes.invites.filter((i) => !i.accepted_at);
+      setInvites(pending);
+      setInvitesCursor(iRes.next_cursor);
+      // has_more refers to raw invites — we can't know how many pending remain
+      // without fetching, so we keep the cursor and let the user load more.
+      setInvitesHasMore(iRes.has_more);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -45,9 +63,48 @@ export default function TeamPage() {
     }
   };
 
+  const loadMoreMembers = async () => {
+    if (!orgId || !membersCursor || loadingMoreMembers) return;
+    setLoadingMoreMembers(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await cloud.listMembers(token, orgId, membersCursor);
+      setMembers((p) => [...p, ...res.members]);
+      setMembersCursor(res.next_cursor);
+      setMembersHasMore(res.has_more);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoadingMoreMembers(false);
+    }
+  };
+
+  const loadMoreInvites = async () => {
+    if (!orgId || !invitesCursor || loadingMoreInvites) return;
+    setLoadingMoreInvites(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await cloud.listInvites(token, orgId, invitesCursor);
+      const pending = res.invites.filter((i) => !i.accepted_at);
+      setInvites((p) => [...p, ...pending]);
+      setInvitesCursor(res.next_cursor);
+      setInvitesHasMore(res.has_more);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoadingMoreInvites(false);
+    }
+  };
+
   useEffect(() => {
     setMembers([]);
+    setMembersCursor(null);
+    setMembersHasMore(false);
     setInvites([]);
+    setInvitesCursor(null);
+    setInvitesHasMore(false);
     setLoading(true);
     load();
   }, [orgId]);
@@ -71,9 +128,7 @@ export default function TeamPage() {
       if (!token) return;
       const updated = await cloud.updateMember(token, orgId!, clerkUserId, role);
       setMembers((p) =>
-        p.map((m) =>
-          m.clerk_user_id === clerkUserId ? { ...m, role: updated.role } : m
-        )
+        p.map((m) => (m.clerk_user_id === clerkUserId ? { ...m, role: updated.role } : m))
       );
       toast.success("Role updated");
     } catch (e: any) {
@@ -131,7 +186,7 @@ export default function TeamPage() {
       {/* Members */}
       <div className="mb-8">
         <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
-          Members ({members.length})
+          Members ({members.length}{membersHasMore ? "+" : ""})
         </p>
         {loading ? (
           <TeamSkeleton />
@@ -167,9 +222,7 @@ export default function TeamPage() {
                           <div>
                             <p className="font-medium">
                               {m.first_name} {m.last_name}{" "}
-                              {isMe && (
-                                <span className="text-xs text-muted-foreground">(you)</span>
-                              )}
+                              {isMe && <span className="text-xs text-muted-foreground">(you)</span>}
                             </p>
                             <p className="text-xs text-muted-foreground">{m.email}</p>
                           </div>
@@ -182,9 +235,7 @@ export default function TeamPage() {
                               className="rounded border border-input bg-background px-2 py-1 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-ring/30"
                             >
                               {ROLES.map((r) => (
-                                <option key={r} value={r}>
-                                  {r}
-                                </option>
+                                <option key={r} value={r}>{r}</option>
                               ))}
                             </select>
                           ) : (
@@ -197,12 +248,7 @@ export default function TeamPage() {
                         <td className="px-4 py-3 text-right">
                           {canManage && !isOwner && !isMe && (
                             <button
-                              onClick={() =>
-                                removeMember(
-                                  m.clerk_user_id,
-                                  `${m.first_name} ${m.last_name}`
-                                )
-                              }
+                              onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
                               className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                               title="Remove member"
                             >
@@ -228,14 +274,10 @@ export default function TeamPage() {
                       <div className="min-w-0">
                         <p className="font-medium text-sm truncate">
                           {m.first_name} {m.last_name}{" "}
-                          {isMe && (
-                            <span className="text-xs text-muted-foreground">(you)</span>
-                          )}
+                          {isMe && <span className="text-xs text-muted-foreground">(you)</span>}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">{m.email}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatDate(m.joined_at)}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(m.joined_at)}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {canManage && !isOwner && !isMe ? (
@@ -245,9 +287,7 @@ export default function TeamPage() {
                             className="rounded border border-input bg-background px-2 py-1 text-xs font-mono focus:outline-none"
                           >
                             {ROLES.map((r) => (
-                              <option key={r} value={r}>
-                                {r}
-                              </option>
+                              <option key={r} value={r}>{r}</option>
                             ))}
                           </select>
                         ) : (
@@ -255,12 +295,7 @@ export default function TeamPage() {
                         )}
                         {canManage && !isOwner && !isMe && (
                           <button
-                            onClick={() =>
-                              removeMember(
-                                m.clerk_user_id,
-                                `${m.first_name} ${m.last_name}`
-                              )
-                            }
+                            onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
                             className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                           >
                             <UserMinus className="h-3.5 w-3.5" />
@@ -272,15 +307,17 @@ export default function TeamPage() {
                 );
               })}
             </div>
+
+            <LoadMore hasMore={membersHasMore} loading={loadingMoreMembers} onLoadMore={loadMoreMembers} />
           </>
         )}
       </div>
 
       {/* Pending invites */}
-      {invites.length > 0 && (
+      {(invites.length > 0 || invitesHasMore) && (
         <div>
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
-            Pending invites ({invites.length})
+            Pending invites ({invites.length}{invitesHasMore ? "+" : ""})
           </p>
 
           {/* Desktop */}
@@ -305,12 +342,8 @@ export default function TeamPage() {
                     className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
                   >
                     <td className="px-4 py-3 font-medium">{inv.email}</td>
-                    <td className="px-4 py-3">
-                      <RoleBadge role={inv.role} />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {formatDate(inv.expires_at)}
-                    </td>
+                    <td className="px-4 py-3"><RoleBadge role={inv.role} /></td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(inv.expires_at)}</td>
                     <td className="px-4 py-3 text-right">
                       {canManage && (
                         <div className="flex items-center justify-end gap-1">
@@ -342,9 +375,7 @@ export default function TeamPage() {
                   <p className="font-medium text-sm truncate">{inv.email}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <RoleBadge role={inv.role} />
-                    <span className="text-xs text-muted-foreground">
-                      Expires {formatDate(inv.expires_at)}
-                    </span>
+                    <span className="text-xs text-muted-foreground">Expires {formatDate(inv.expires_at)}</span>
                   </div>
                 </div>
                 {canManage && (
@@ -361,6 +392,8 @@ export default function TeamPage() {
               </div>
             ))}
           </div>
+
+          <LoadMore hasMore={invitesHasMore} loading={loadingMoreInvites} onLoadMore={loadMoreInvites} />
         </div>
       )}
 
@@ -419,7 +452,6 @@ function InviteModal({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "developer" | "viewer">("developer");
   const [loading, setLoading] = useState(false);
-  // Track whether the invite was sent so we can show a confirmation state.
   const [sent, setSent] = useState<Invite | null>(null);
 
   const submit = async () => {
@@ -442,7 +474,6 @@ function InviteModal({
     }
   };
 
-  // Close on Escape.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handler);
@@ -456,7 +487,6 @@ function InviteModal({
     >
       <div className="w-full max-w-sm rounded-2xl border-2 border-border bg-popover p-6 shadow-xl">
         {sent ? (
-          // ── Success state ──────────────────────────────────────────────────
           <div className="text-center py-2">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
               <Mail className="h-6 w-6 text-green-500" />
@@ -467,8 +497,7 @@ function InviteModal({
             </p>
             <p className="text-xs text-muted-foreground mb-5">
               If they don't have an account, the email will guide them to sign up first.
-              The link expires{" "}
-              <strong>{formatDate(sent.expires_at)}</strong>.
+              The link expires <strong>{formatDate(sent.expires_at)}</strong>.
             </p>
             <button
               onClick={onClose}
@@ -478,18 +507,14 @@ function InviteModal({
             </button>
           </div>
         ) : (
-          // ── Form state ────────────────────────────────────────────────────
           <>
             <h2 className="font-semibold text-base mb-1">Invite member</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              An email will be sent with a link to join. New users will be prompted
-              to create an account first.
+              An email will be sent with a link to join. New users will be prompted to create an account first.
             </p>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Email
-                </label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -501,18 +526,14 @@ function InviteModal({
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Role
-                </label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Role</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as typeof role)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
                 >
                   {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
-                    </option>
+                    <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
                   ))}
                 </select>
                 <RoleDescription role={role} />
@@ -546,9 +567,7 @@ function RoleDescription({ role }: { role: string }) {
     developer: "Can view API keys and usage. Cannot manage members.",
     viewer: "Read-only access to the dashboard.",
   };
-  return (
-    <p className="text-xs text-muted-foreground mt-1.5">{descriptions[role]}</p>
-  );
+  return <p className="text-xs text-muted-foreground mt-1.5">{descriptions[role]}</p>;
 }
 
 function TeamSkeleton() {

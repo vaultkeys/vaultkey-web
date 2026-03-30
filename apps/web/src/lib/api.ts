@@ -32,6 +32,14 @@ async function req<T>(
   return res.json() as Promise<T>;
 }
 
+function buildQS(params: Record<string, string | number | undefined>): string {
+  const entries = Object.entries(params).filter(
+    ([, v]) => v !== undefined && v !== "" && v !== null,
+  ) as [string, string | number][];
+  if (entries.length === 0) return "";
+  return "?" + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface Org { id: string; name: string; slug: string; billing_email: string; created_at: string; }
@@ -50,7 +58,6 @@ export interface DailyUsage { date: string; operation: string; count: number; cr
 export interface UsageStats { org_id: string; period: { start: string; end: string }; total_credits_consumed: number; total_operations: number; current_balance: number; by_operation: OperationStat[]; daily?: DailyUsage[]; }
 export interface JobStatus { id: string; status: string; result?: unknown; error?: string; created_at: string; updated_at: string; }
 
-// ── Relayer (Fee Payer) types ─────────────────────────────────────────────────
 export interface Relayer {
   id: string;
   wallet_id: string;
@@ -70,17 +77,22 @@ export interface RelayerInfo {
   healthy: boolean;
 }
 
-// ── Master Wallet (Collection Wallet) types ───────────────────────────────────
-// Mirrors Go's sweepConfigResponse struct exactly.
 export interface MasterWallet {
   id: string;
   chain_type: string;
   chain_id?: string;
-  master_wallet_id: string;  // the wallet ID
-  master_address: string;    // the wallet address
-  dust_threshold: string;    // min balance before sweep triggers
-  enabled: boolean;          // whether auto-sweep is active
+  master_wallet_id: string;
+  master_address: string;
+  dust_threshold: string;
+  enabled: boolean;
 }
+
+// ── Paginated response wrapper ────────────────────────────────────────────────
+
+export type Paginated<K extends string, T> = {
+  next_cursor: string | null;
+  has_more: boolean;
+} & Record<K, T[]>;
 
 // ── Cloud endpoints (Clerk JWT bearer) ────────────────────────────────────────
 
@@ -101,8 +113,8 @@ export function makeCloud(baseUrl: string) {
     deleteOrg: (token: string, orgId: string) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}`, { method: "DELETE", token }),
 
-    listMembers: (token: string, orgId: string) =>
-      req<{ members: Member[] }>(baseUrl, `/cloud/organizations/${orgId}/members`, { token }),
+    listMembers: (token: string, orgId: string, after?: string, limit?: number) =>
+      req<Paginated<"members", Member>>(baseUrl, `/cloud/organizations/${orgId}/members${buildQS({ after, limit })}`, { token }),
 
     updateMember: (token: string, orgId: string, clerkUserId: string, role: string) =>
       req<Member>(baseUrl, `/cloud/organizations/${orgId}/members/${clerkUserId}`, { method: "PATCH", body: JSON.stringify({ role }), token }),
@@ -113,8 +125,8 @@ export function makeCloud(baseUrl: string) {
     createInvite: (token: string, orgId: string, body: { email: string; role: string }) =>
       req<Invite>(baseUrl, `/cloud/organizations/${orgId}/invites`, { method: "POST", body: JSON.stringify(body), token }),
 
-    listInvites: (token: string, orgId: string) =>
-      req<{ invites: Invite[] }>(baseUrl, `/cloud/organizations/${orgId}/invites`, { token }),
+    listInvites: (token: string, orgId: string, after?: string, limit?: number) =>
+      req<Paginated<"invites", Invite>>(baseUrl, `/cloud/organizations/${orgId}/invites${buildQS({ after, limit })}`, { token }),
 
     revokeInvite: (token: string, orgId: string, inviteToken: string) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/invites/${inviteToken}`, { method: "DELETE", token }),
@@ -125,8 +137,8 @@ export function makeCloud(baseUrl: string) {
     createApiKey: (token: string, orgId: string, name: string) =>
       req<ApiKeyCreated>(baseUrl, `/cloud/organizations/${orgId}/api-keys`, { method: "POST", body: JSON.stringify({ name }), token }),
 
-    listApiKeys: (token: string, orgId: string) =>
-      req<{ api_keys: ApiKey[] }>(baseUrl, `/cloud/organizations/${orgId}/api-keys`, { token }),
+    listApiKeys: (token: string, orgId: string, after?: string, limit?: number) =>
+      req<Paginated<"api_keys", ApiKey>>(baseUrl, `/cloud/organizations/${orgId}/api-keys${buildQS({ after, limit })}`, { token }),
 
     revokeApiKey: (token: string, orgId: string, keyId: string) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/api-keys/${keyId}`, { method: "DELETE", token }),
@@ -145,7 +157,6 @@ export function makeCloud(baseUrl: string) {
     getCredits: (token: string, orgId: string) =>
       req<{ org_id: string; balance: number }>(baseUrl, `/cloud/organizations/${orgId}/credits`, { token }),
 
-    // ── Relayer (Fee Payer) ──────────────────────────────────────────────────
     registerRelayer: (
       token: string,
       orgId: string,
@@ -158,14 +169,12 @@ export function makeCloud(baseUrl: string) {
       return req<RelayerInfo>(baseUrl, `/cloud/organizations/${orgId}/relayer?${qs}`, { token });
     },
 
-    listRelayers: (token: string, orgId: string) =>
-      req<{ relayers: Relayer[] }>(baseUrl, `/cloud/organizations/${orgId}/relayers`, { token }),
+    listRelayers: (token: string, orgId: string, after?: string, limit?: number) =>
+      req<Paginated<"relayers", Relayer>>(baseUrl, `/cloud/organizations/${orgId}/relayers${buildQS({ after, limit })}`, { token }),
 
     deactivateRelayer: (token: string, orgId: string, relayerId: string) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/relayer/${relayerId}`, { method: "DELETE", token }),
 
-    // ── Master Wallet (Collection Wallet) ────────────────────────────────────
-    // Body fields match Go's provisionMasterWalletRequest exactly.
     provisionMasterWallet: (
       token: string,
       orgId: string,
@@ -178,11 +187,9 @@ export function makeCloud(baseUrl: string) {
       return req<MasterWallet>(baseUrl, `/cloud/organizations/${orgId}/master-wallet?${qs}`, { token });
     },
 
-    // Response key matches Go: { master_wallets: [...] }
     listMasterWallets: (token: string, orgId: string) =>
       req<{ master_wallets: MasterWallet[] }>(baseUrl, `/cloud/organizations/${orgId}/master-wallets`, { token }),
 
-    // Body fields match Go's updateSweepConfigRequest exactly.
     updateMasterWallet: (
       token: string,
       orgId: string,
@@ -205,8 +212,8 @@ export function makeSDK(baseUrl: string) {
     getWallet: (creds: Creds, walletId: string) =>
       req<Wallet>(baseUrl, `/sdk/wallets/${walletId}`, { ...creds }),
 
-    listUserWallets: (creds: Creds, userId: string) =>
-      req<{ wallets: Wallet[] }>(baseUrl, `/sdk/users/${userId}/wallets`, { ...creds }),
+    listUserWallets: (creds: Creds, userId: string, after?: string, limit?: number) =>
+      req<Paginated<"wallets", Wallet>>(baseUrl, `/sdk/users/${userId}/wallets${buildQS({ after, limit })}`, { ...creds }),
 
     getBalance: (creds: Creds, walletId: string, chainId?: string) => {
       const qs = chainId ? `?chain_id=${chainId}` : "";

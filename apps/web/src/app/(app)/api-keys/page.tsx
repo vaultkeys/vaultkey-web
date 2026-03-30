@@ -9,6 +9,7 @@ import { useOrg } from "@/hooks/useOrg";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CopyButton } from "@/components/shared/CopyButton";
+import { LoadMore } from "@/components/shared/LoadMore";
 import { formatDate } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 
@@ -16,8 +17,12 @@ export default function ApiKeysPage() {
   const { getToken } = useAuth();
   const { orgId } = useOrg();
   const { cloud } = useApi();
+
   const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [justCreated, setJustCreated] = useState<ApiKeyCreated | null>(null);
 
@@ -26,14 +31,41 @@ export default function ApiKeysPage() {
     try {
       const token = await getToken();
       if (!token) return;
-      const { api_keys } = await cloud.listApiKeys(token, orgId);
-      setKeys(api_keys);
+      const res = await cloud.listApiKeys(token, orgId);
+      setKeys(res.api_keys);
+      setNextCursor(res.next_cursor);
+      setHasMore(res.has_more);
     } catch (e: any) {
       toast.error(e.message);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); }, [orgId]);
+  const loadMore = async () => {
+    if (!orgId || !nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await cloud.listApiKeys(token, orgId, nextCursor);
+      setKeys((p) => [...p, ...res.api_keys]);
+      setNextCursor(res.next_cursor);
+      setHasMore(res.has_more);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    setKeys([]);
+    setNextCursor(null);
+    setHasMore(false);
+    setLoading(true);
+    load();
+  }, [orgId]);
 
   const revoke = async (keyId: string, keyName: string) => {
     if (!confirm(`Revoke "${keyName}"? This cannot be undone.`)) return;
@@ -43,7 +75,9 @@ export default function ApiKeysPage() {
       await cloud.revokeApiKey(token, orgId!, keyId);
       setKeys((p) => p.filter((k) => k.id !== keyId));
       toast.success("API key revoked");
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   return (
@@ -61,18 +95,22 @@ export default function ApiKeysPage() {
         }
       />
 
-      {/* One-time secret display */}
       {justCreated && (
         <div className="mb-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Save your API secret now — it won't be shown again</p>
+              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                Save your API secret now — it won't be shown again
+              </p>
               <div className="mt-3 space-y-2">
                 <SecretRow label="Key" value={justCreated.key} />
                 <SecretRow label="Secret" value={justCreated.secret} />
               </div>
-              <button onClick={() => setJustCreated(null)} className="mt-3 text-xs text-muted-foreground hover:text-foreground underline">
+              <button
+                onClick={() => setJustCreated(null)}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground underline"
+              >
                 I've saved it, dismiss
               </button>
             </div>
@@ -88,7 +126,10 @@ export default function ApiKeysPage() {
           title="No API keys yet"
           description="Create an API key to authenticate SDK calls from your backend."
           action={
-            <button onClick={() => setShowCreate(true)} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
               <Plus className="h-4 w-4" /> Create first key
             </button>
           }
@@ -151,6 +192,8 @@ export default function ApiKeysPage() {
               </div>
             ))}
           </div>
+
+          <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} />
         </>
       )}
 
@@ -159,15 +202,7 @@ export default function ApiKeysPage() {
           onClose={() => setShowCreate(false)}
           onCreated={(k) => {
             setJustCreated(k);
-            // Only push ApiKey-shaped data into the list — never include `secret`
-            setKeys((p) => [{
-              id: k.id,
-              name: k.name,
-              key: k.key,
-              active: true,
-              last_used_at: undefined,
-              created_at: k.created_at,
-            }, ...p]);
+            setKeys((p) => [{ id: k.id, name: k.name, key: k.key, active: true, last_used_at: undefined, created_at: k.created_at }, ...p]);
             setShowCreate(false);
           }}
           orgId={orgId!}
@@ -209,7 +244,9 @@ function CreateKeyModal({ onClose, onCreated, orgId }: { onClose: () => void; on
       onCreated(key);
     } catch (e: any) {
       toast.error(e.message);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
