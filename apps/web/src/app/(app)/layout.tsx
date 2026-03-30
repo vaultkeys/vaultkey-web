@@ -1,13 +1,26 @@
-import { EnvProvider } from "@/hooks/useEnv";
-import { OrgProvider } from "@/hooks/useOrg";
+"use client";
+
+import { EnvProvider, useEnv } from "@/hooks/useEnv";
+import { OrgProvider, useOrg } from "@/hooks/useOrg";
 import { AppShell } from "@/components/layout/AppShell";
 import React from "react";
+
+function AppContent({ children }: { children: React.ReactNode }) {
+  const { env } = useEnv();
+  const { orgId } = useOrg();
+
+  return (
+    <AppShell>
+      <div key={`${env}-${orgId}`}>{children}</div>
+    </AppShell>
+  );
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EnvProvider>
       <OrgProvider>
-        <AppShell>{children}</AppShell>
+        <AppContent>{children}</AppContent>
       </OrgProvider>
     </EnvProvider>
   );
