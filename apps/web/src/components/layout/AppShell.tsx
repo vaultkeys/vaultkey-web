@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Wallet, ArrowLeftRight, KeyRound,
   Users, CreditCard, Settings, Fuel, Warehouse,
   Sun, Moon, ChevronRight, Menu, X,
+  Webhook,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/hooks/useOrg";
@@ -23,6 +24,7 @@ const nav = [
   { label: "Fee Payers",        href: "/relayers",           icon: Fuel },
   { label: "Collection Wallets", href: "/master-wallets",    icon: Warehouse },
   { label: "API Keys",          href: "/api-keys",           icon: KeyRound },
+  { label: "Webhooks",          href: "/webhooks",                    icon: Webhook },
   { label: "Team",              href: "/team",               icon: Users },
   { label: "Billing",           href: "/billing",            icon: CreditCard },
   { label: "Settings",          href: "/settings",           icon: Settings },

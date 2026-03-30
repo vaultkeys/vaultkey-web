@@ -87,6 +87,48 @@ export interface MasterWallet {
   enabled: boolean;
 }
 
+
+
+export interface WebhookConfig {
+  url: string | null;
+  has_secret: boolean;
+}
+
+export interface RotateSecretResponse {
+  secret: string;
+  previous_expires_at: string;
+}
+
+export interface TestWebhookResponse {
+  success: boolean;
+  response_status?: number;
+  response_body?: string;
+  latency_ms: number;
+  error?: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  org_id?: string;
+  success: boolean;
+  response_status: number;
+  response_body: string;
+  latency_ms: number;
+  error: string;
+  created_at: string;
+  event_type?: string;
+}
+
+export interface WebhookStats {
+  last_24h: {
+    total: number;
+    succeeded: number;
+    failed: number;
+    success_rate: number;
+    avg_latency_ms: number;
+  };
+}
+
 // ── Paginated response wrapper ────────────────────────────────────────────────
 
 export type Paginated<K extends string, T> = {
@@ -197,6 +239,43 @@ export function makeCloud(baseUrl: string) {
       body: { dust_threshold?: string; enabled?: boolean },
     ) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/master-wallet/${configId}`, { method: "PATCH", body: JSON.stringify(body), token }),
+
+    // ── Webhook ────────────────────────────────────────────────────────────────
+    getWebhook: (token: string, orgId: string) =>
+      req<WebhookConfig>(baseUrl, `/cloud/organizations/${orgId}/webhook`, { token }),
+
+    updateWebhook: (token: string, orgId: string, url: string) =>
+      req<{ status: string }>(baseUrl, `/cloud/organizations/${orgId}/webhook`, {
+        method: "PUT", body: JSON.stringify({ url }), token,
+      }),
+
+    deleteWebhook: (token: string, orgId: string) =>
+      req<{ status: string }>(baseUrl, `/cloud/organizations/${orgId}/webhook`, {
+        method: "DELETE", token,
+      }),
+
+    testWebhook: (token: string, orgId: string) =>
+      req<TestWebhookResponse>(baseUrl, `/cloud/organizations/${orgId}/webhook/test`, {
+        method: "POST", token,
+      }),
+
+    rotateWebhookSecret: (token: string, orgId: string) =>
+      req<RotateSecretResponse>(baseUrl, `/cloud/organizations/${orgId}/webhook/secret/rotate`, {
+        method: "POST", token,
+      }),
+
+    listWebhookDeliveries: (token: string, orgId: string, after?: string, limit = 20, failed?: boolean) => {
+      const qs = new URLSearchParams();
+      if (after) qs.set("after", after);
+      qs.set("limit", String(limit));
+      if (failed) qs.set("failed", "true");
+      return req<Paginated<"deliveries", WebhookDelivery>>(
+        baseUrl, `/cloud/organizations/${orgId}/webhook/deliveries?${qs}`, { token },
+      );
+    },
+
+    getWebhookStats: (token: string, orgId: string) =>
+      req<WebhookStats>(baseUrl, `/cloud/organizations/${orgId}/webhook/stats`, { token }),
   };
 }
 
