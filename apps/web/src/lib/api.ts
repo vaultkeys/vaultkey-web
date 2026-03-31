@@ -188,8 +188,8 @@ export function makeCloud(baseUrl: string) {
     createPaymentIntent: (token: string, body: { amount_cents: number; currency: string }) =>
       req<PaymentIntentRes>(baseUrl, "/cloud/billing/purchase", { method: "POST", body: JSON.stringify(body), token }),
 
-    getBillingHistory: (token: string) =>
-      req<BillingHistory>(baseUrl, "/cloud/billing/history", { token }),
+    getBillingHistory: (token: string, orgId: string) =>
+      req<BillingHistory>(baseUrl, `/cloud/organizations/${orgId}/billing/history`, { token }),
 
     getUsage: (token: string, orgId: string, params?: { start?: string; end?: string; breakdown?: string }) => {
       const qs = new URLSearchParams(params as Record<string, string>).toString();

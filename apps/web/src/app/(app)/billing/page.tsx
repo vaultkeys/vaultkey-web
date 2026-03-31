@@ -48,10 +48,10 @@ export default function BillingPage() {
         // Don't fetch billing history on testnet — no payments exist
         isTestnet
           ? Promise.resolve({ payments: [] })
-          : cloud.getBillingHistory(token),
+          : cloud.getBillingHistory(token, orgId),
       ]);
       setBalance(creditsData.balance);
-      setHistory(histData.payments ?? []);
+      setHistory(histData?.payments ?? []);
     } catch (e: any) {
       toast.error(e.message);
     } finally { setLoading(false); }

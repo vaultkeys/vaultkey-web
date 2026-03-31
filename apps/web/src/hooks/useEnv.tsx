@@ -60,7 +60,7 @@ export function EnvProvider({ children }: { children: React.ReactNode }) {
       baseUrl,
       hydrated,
     }}>
-      {children}
+      {hydrated ? children : null}
     </EnvContext.Provider>
   );
 }

@@ -46,13 +46,17 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   }, [baseUrl]);
 
   const refetch = useCallback(async () => {
+    console.log("refetch called", { userId, baseUrl });
     if (!userId) { setLoading(false); return; }
     setLoading(true);
     try {
       const token = await getToken();
       if (!token) return;
       const api = makeCloud(baseUrl);
+      console.log("Fetching orgs with token", { token: token.slice(0, 10) + "..." });
       const { organizations } = await api.listOrgs(token);
+      console.log("Orgs fetched", { count: organizations.length, orgs: organizations.map((o) => ({ id: o.id, name: o.name })) });
+
       setOrgs(organizations);
 
       if (organizations.length === 0) {
@@ -93,12 +97,13 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
 
   // Re-fetch whenever the environment switches
   useEffect(() => {
+    console.log("OrgProvider effect fired", { hydrated, env, userId });
     if (!hydrated) return;
     setOrg(null);
     setOrgs([]);
     setLoading(true);
     refetch();
-  }, [env, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [env, hydrated, userId]);
 
   return (
     <OrgContext.Provider value={{ orgs, org, orgId: org?.id ?? null, loading, needsOnboarding, setActiveOrg, refetch }}>
