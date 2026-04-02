@@ -23,3 +23,11 @@ export function StatusBadge({ status }: { status: string }) {
     </span>
   );
 }
+
+export function StatusBadgeBoolean({ active, resultIfYes, resultIfNo }: { active: boolean; resultIfYes: string; resultIfNo: string }) {
+  return (
+    <span className={cn("inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium",
+      active ? "border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400" : "border-muted-foreground/20 bg-muted/40 text-muted-foreground"
+    )}>{active ? resultIfYes : resultIfNo}</span>
+  );
+}

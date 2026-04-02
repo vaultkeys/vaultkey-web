@@ -4,6 +4,7 @@ import { EnvProvider, useEnv } from "@/hooks/useEnv";
 import { OrgProvider, useOrg } from "@/hooks/useOrg";
 import { AppShell } from "@/components/layout/AppShell";
 import React from "react";
+import { ChainsProvider } from "@/hooks/useChains";
 
 function AppContent({ children }: { children: React.ReactNode }) {
   const { env } = useEnv();
@@ -20,7 +21,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EnvProvider>
       <OrgProvider>
-        <AppContent>{children}</AppContent>
+        <ChainsProvider>
+          <AppContent>{children}</AppContent>
+        </ChainsProvider>
       </OrgProvider>
     </EnvProvider>
   );

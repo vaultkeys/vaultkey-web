@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { shortAddress, formatDate, cn } from "@/lib/utils";
+import { StatusBadgeBoolean } from "@/components/shared/StatusBadge";
+import ChainBadge from "@/components/shared/ChainBadge";
 
 export default function MasterWalletsPage() {
   const { getToken } = useAuth();
@@ -114,7 +116,7 @@ export default function MasterWalletsPage() {
                       {w.dust_threshold === "0" ? "Always sweep" : w.dust_threshold}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge enabled={w.enabled} />
+                      <StatusBadgeBoolean active={w.enabled} resultIfYes="Active" resultIfNo="Inactive" />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -139,7 +141,7 @@ export default function MasterWalletsPage() {
                     <span className="font-mono text-xs truncate">{shortAddress(w.master_address)}</span>
                     <CopyButton value={w.master_address} />
                   </div>
-                  <StatusBadge enabled={w.enabled} />
+                  <StatusBadgeBoolean active={w.enabled} resultIfYes="Active" resultIfNo="Inactive" />
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <div className="flex justify-between">
@@ -188,37 +190,6 @@ export default function MasterWalletsPage() {
         />
       )}
     </div>
-  );
-}
-
-function ChainBadge({ chain, chainId }: { chain: string; chainId?: string }) {
-  const label = chain === "evm" && chainId ? `${chain.toUpperCase()} (${chainId})` : chain.toUpperCase();
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono",
-        chain === "evm"
-          ? "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400"
-          : "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400"
-      )}
-    >
-      {label}
-    </span>
-  );
-}
-
-function StatusBadge({ enabled }: { enabled: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium",
-        enabled
-          ? "border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400"
-          : "border-muted-foreground/20 bg-muted/40 text-muted-foreground"
-      )}
-    >
-      {enabled ? "Active" : "Paused"}
-    </span>
   );
 }
 

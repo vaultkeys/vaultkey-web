@@ -17,6 +17,7 @@ import { LoadMore } from "@/components/shared/LoadMore";
 import { formatDate, cn } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { RotateSecretResponse, TestWebhookResponse, WebhookConfig, WebhookDelivery, WebhookStats } from "@/lib/api";
+import { WebhookStatCard } from "@/components/shared/StatCard";
 
 
 export default function WebhookPage() {
@@ -194,10 +195,10 @@ export default function WebhookPage() {
       {/* ── Stats bar ── */}
       {stats && hasUrl && (
         <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Deliveries (24h)" value={stats.last_24h.total} icon={<Activity className="h-3.5 w-3.5" />} />
-          <StatCard label="Success rate" value={`${(stats.last_24h.success_rate * 100).toFixed(0)}%`} icon={<CheckCircle2 className="h-3.5 w-3.5" />} color={stats.last_24h.success_rate >= 0.95 ? "green" : stats.last_24h.success_rate >= 0.7 ? "yellow" : "red"} />
-          <StatCard label="Failures (24h)" value={stats.last_24h.failed} icon={<XCircle className="h-3.5 w-3.5" />} color={stats.last_24h.failed > 0 ? "red" : undefined} />
-          <StatCard label="Avg latency" value={`${stats.last_24h.avg_latency_ms}ms`} icon={<Zap className="h-3.5 w-3.5" />} />
+          <WebhookStatCard label="Deliveries (24h)" value={stats.last_24h.total} icon={<Activity className="h-3.5 w-3.5" />} />
+          <WebhookStatCard label="Success rate" value={`${(stats.last_24h.success_rate * 100).toFixed(0)}%`} icon={<CheckCircle2 className="h-3.5 w-3.5" />} color={stats.last_24h.success_rate >= 0.95 ? "green" : stats.last_24h.success_rate >= 0.7 ? "yellow" : "red"} />
+          <WebhookStatCard label="Failures (24h)" value={stats.last_24h.failed} icon={<XCircle className="h-3.5 w-3.5" />} color={stats.last_24h.failed > 0 ? "red" : undefined} />
+          <WebhookStatCard label="Avg latency" value={`${stats.last_24h.avg_latency_ms}ms`} icon={<Zap className="h-3.5 w-3.5" />} />
         </div>
       )}
 
@@ -443,27 +444,6 @@ export default function WebhookPage() {
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color?: "green" | "red" | "yellow" }) {
-  const colorMap = {
-    green: "text-green-600 dark:text-green-400",
-    red: "text-red-600 dark:text-red-400",
-    yellow: "text-yellow-600 dark:text-yellow-400",
-  };
-  return (
-    <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
-      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-        {icon}
-        <span className="text-xs">{label}</span>
-      </div>
-      <p className={cn("text-lg font-semibold font-mono tabular-nums", color ? colorMap[color] : "text-foreground")}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function DeliveryRow({ delivery: d, expanded, onToggle, isLast }: {
   delivery: WebhookDelivery;
   expanded: boolean;
@@ -544,8 +524,6 @@ function DeliveriesSkeleton() {
     </div>
   );
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function isValidUrl(url: string): boolean {
   try {

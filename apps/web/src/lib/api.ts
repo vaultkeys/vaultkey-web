@@ -129,6 +129,14 @@ export interface WebhookStats {
   };
 }
 
+export interface Chain {
+  name: string;
+  chain_id: string;
+  testnet: boolean;
+  native_symbol: string;
+  legacy_symbol?: string;
+}
+
 // ── Paginated response wrapper ────────────────────────────────────────────────
 
 export type Paginated<K extends string, T> = {
@@ -276,6 +284,9 @@ export function makeCloud(baseUrl: string) {
 
     getWebhookStats: (token: string, orgId: string) =>
       req<WebhookStats>(baseUrl, `/cloud/organizations/${orgId}/webhook/stats`, { token }),
+
+    getChains: (token: string) =>
+    req<{ chains: Chain[]; environment: string }>(baseUrl, "/cloud/chains", { token }),
   };
 }
 
