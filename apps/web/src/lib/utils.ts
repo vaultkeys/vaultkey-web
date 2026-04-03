@@ -67,3 +67,75 @@ export function operationLabel(op: string): string {
   };
   return map[op] ?? op;
 }
+
+// ── ADD to lib/utils.ts ───────────────────────────────────────────────────────
+// Paste these alongside the existing utility functions.
+
+/**
+ * Converts a wei value (hex string like "0x..." or decimal string) to a
+ * human-readable ETH string, rounded to 6 significant decimal places.
+ * Returns "—" on invalid input.
+ */
+export function weiToEth(wei: string): string {
+  try {
+    const raw = wei.startsWith("0x")
+      ? BigInt(wei)
+      : BigInt(wei);
+    // ETH has 18 decimals. Divide using integer math to avoid float precision loss.
+    const eth = Number(raw) / 1e18;
+    if (!isFinite(eth)) return "—";
+    // Show up to 6 decimal places, strip trailing zeros.
+    return eth.toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 6,
+    });
+  } catch {
+    return "—";
+  }
+}
+
+/**
+ * Converts a lamports value (decimal string or number) to a human-readable
+ * SOL string, rounded to 6 decimal places.
+ * Returns "—" on invalid input.
+ */
+export function lamportsToSol(lamports: string | number): string {
+  try {
+    const raw = typeof lamports === "string" ? Number(lamports) : lamports;
+    if (!isFinite(raw)) return "—";
+    const sol = raw / 1e9;
+    return sol.toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 6,
+    });
+  } catch {
+    return "—";
+  }
+}
+
+/**
+ * Formats a balance + unit from the RelayerLiveInfo response into a
+ * human-readable string with its symbol.
+ * e.g. { balance: "0x2386f26fc10000", unit: "wei" } → { value: "0.01", symbol: "ETH" }
+ */
+export function formatRelayerBalance(
+  balance: string,
+  unit: string,
+  chainType: string,
+  nativeSymbol?: string,
+): { value: string; symbol: string } {
+  if (unit === "wei") {
+    return {
+      value: weiToEth(balance),
+      symbol: nativeSymbol ?? "ETH",
+    };
+  }
+  if (unit === "lamports") {
+    return {
+      value: lamportsToSol(balance),
+      symbol: "SOL",
+    };
+  }
+  // Fallback for unknown units — show raw value.
+  return { value: balance, symbol: unit };
+}

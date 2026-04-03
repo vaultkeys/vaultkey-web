@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Plus, Fuel, AlertTriangle, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ export default function RelayersPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const router = useRouter();
 
   // Ensure chains are loaded as soon as this page mounts.
   const { ensureChains } = useChains();
@@ -143,7 +145,11 @@ export default function RelayersPage() {
               </thead>
               <tbody>
                 {relayers.map((r) => (
-                  <tr key={r.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                  <tr
+                    key={r.id}
+                    onClick={() => router.push(`/relayers/${r.id}`)}
+                    className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs">{shortAddress(r.address)}</span>
@@ -156,7 +162,7 @@ export default function RelayersPage() {
                     </td>
                     <td className="px-4 py-3"><StatusBadgeBoolean active={r.active} resultIfYes="Active" resultIfNo="Inactive" /></td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => deactivate(r.id, r.address)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); deactivate(r.id, r.address); }} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </td>
@@ -169,7 +175,11 @@ export default function RelayersPage() {
           {/* Mobile card list */}
           <div className="sm:hidden space-y-2">
             {relayers.map((r) => (
-              <div key={r.id} className="rounded-xl border border-border bg-card p-4">
+              <div
+                key={r.id}
+                onClick={() => router.push(`/relayers/${r.id}`)}
+                className="rounded-xl border border-border bg-card p-4 cursor-pointer hover:bg-muted/20 transition-colors"
+              >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="font-mono text-xs truncate">{shortAddress(r.address)}</span>
@@ -179,9 +189,9 @@ export default function RelayersPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                   <ChainBadge chain={r.chain_type} chainId={r.chain_id} />
-                  <span className="font-mono">Alert: {r.min_balance_alert} {r.chain_type === "evm" ? "SOL" : "ETH"}</span>
+                  <span className="font-mono">Alert: {r.min_balance_alert} {r.chain_type === "evm" ? "ETH" : "SOL"}</span>
                 </div>
-                <button onClick={() => deactivate(r.id, r.address)} className="w-full mt-2 px-3 py-1.5 rounded-md text-xs border border-border hover:bg-destructive/10 hover:text-destructive transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); deactivate(r.id, r.address); }} className="w-full mt-2 px-3 py-1.5 rounded-md text-xs border border-border hover:bg-destructive/10 hover:text-destructive transition-colors">
                   Deactivate
                 </button>
               </div>

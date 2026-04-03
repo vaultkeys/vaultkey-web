@@ -66,6 +66,7 @@ export interface Relayer {
   chain_id?: string;
   min_balance_alert: string;
   active: boolean;
+  created_at: string;
 }
 export interface RelayerInfo {
   wallet_id: string;
@@ -75,6 +76,17 @@ export interface RelayerInfo {
   balance: string;
   unit: string;
   healthy: boolean;
+}
+export interface RelayerLiveInfo {
+  wallet_id: string;
+  address: string;
+  chain_type: string;
+  chain_id?: string;
+  balance: string;       // wei for EVM, lamports for Solana — raw from chain
+  unit: string;          // "wei" | "lamports"
+  healthy: boolean;      // balance >= hardcoded floor (0.05 ETH / 0.05 SOL)
+  min_balance_alert: string;   // user-configured threshold as decimal string
+  alert_triggered: boolean;    // balance < min_balance_alert
 }
 
 export interface MasterWallet {
@@ -214,16 +226,25 @@ export function makeCloud(baseUrl: string) {
     ) =>
       req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayer`, { method: "POST", body: JSON.stringify(body), token }),
 
-    getRelayer: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
-      const qs = new URLSearchParams(params as Record<string, string>).toString();
-      return req<RelayerInfo>(baseUrl, `/cloud/organizations/${orgId}/relayer?${qs}`, { token });
-    },
+    // getRelayer: (token: string, orgId: string, params: { chain_type: string; chain_id?: string }) => {
+    //   const qs = new URLSearchParams(params as Record<string, string>).toString();
+    //   return req<RelayerInfo>(baseUrl, `/cloud/organizations/${orgId}/relayer?${qs}`, { token });
+    // },
 
     listRelayers: (token: string, orgId: string, after?: string, limit?: number) =>
       req<Paginated<"relayers", Relayer>>(baseUrl, `/cloud/organizations/${orgId}/relayers${buildQS({ after, limit })}`, { token }),
 
     deactivateRelayer: (token: string, orgId: string, relayerId: string) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/relayer/${relayerId}`, { method: "DELETE", token }),
+
+    getRelayer: (token: string, orgId: string, relayerId: string) =>
+      req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}`, { token }),
+
+    getRelayerLiveInfo: (token: string, orgId: string, relayerId: string) =>
+      req<RelayerLiveInfo>(baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}/info`, { token }),
+
+    updateRelayer: (token: string, orgId: string, relayerId: string, body: { min_balance_alert: string }) =>
+      req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}`, { method: "PATCH", body: JSON.stringify(body), token }),
 
     provisionMasterWallet: (
       token: string,
