@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Plus, KeyRound, Trash2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -9,62 +9,32 @@ import { useOrg } from "@/hooks/useOrg";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CopyButton } from "@/components/shared/CopyButton";
-import { LoadMore } from "@/components/shared/LoadMore";
 import { formatDate } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
+import { usePagedCursor } from "@/hooks/usePagedCursor";
+import { Pagination } from "@/components/shared/Pagination";
 
 export default function ApiKeysPage() {
   const { getToken } = useAuth();
   const { orgId } = useOrg();
   const { cloud } = useApi();
 
-  const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [justCreated, setJustCreated] = useState<ApiKeyCreated | null>(null);
 
-  const load = async () => {
-    if (!orgId) return;
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listApiKeys(token, orgId);
-      setKeys(res.api_keys);
-      setNextCursor(res.next_cursor);
-      setHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetcher = useCallback(async (cursor: string | undefined) => {
+  const token = await getToken();
+  if (!token) return { items: [], next_cursor: null, has_more: false };
+    const res = await cloud.listApiKeys(token, orgId!, cursor);
+    return { items: res.api_keys, next_cursor: res.next_cursor, has_more: res.has_more };
+  }, [orgId, getToken, cloud]);
+  const { items: keys, currentPage, totalKnownPages, hasMore, loading, goToPage, loadFirst, reset } = usePagedCursor<ApiKey>({ fetcher });
 
-  const loadMore = async () => {
-    if (!orgId || !nextCursor || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listApiKeys(token, orgId, nextCursor);
-      setKeys((p) => [...p, ...res.api_keys]);
-      setNextCursor(res.next_cursor);
-      setHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
 
   useEffect(() => {
-    setKeys([]);
-    setNextCursor(null);
-    setHasMore(false);
-    setLoading(true);
-    load();
+    if (!orgId) return;
+    reset();
+    loadFirst().catch((e) => toast.error(e.message));
   }, [orgId]);
 
   const revoke = async (keyId: string, keyName: string) => {
@@ -73,7 +43,8 @@ export default function ApiKeysPage() {
       const token = await getToken();
       if (!token) return;
       await cloud.revokeApiKey(token, orgId!, keyId);
-      setKeys((p) => p.filter((k) => k.id !== keyId));
+      reset(); 
+      loadFirst();
       toast.success("API key revoked");
     } catch (e: any) {
       toast.error(e.message);
@@ -193,7 +164,7 @@ export default function ApiKeysPage() {
             ))}
           </div>
 
-          <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} />
+          <Pagination currentPage={currentPage} totalKnownPages={totalKnownPages} hasMore={hasMore} loading={loading} onPage={goToPage} />
         </>
       )}
 
@@ -202,7 +173,8 @@ export default function ApiKeysPage() {
           onClose={() => setShowCreate(false)}
           onCreated={(k) => {
             setJustCreated(k);
-            setKeys((p) => [{ id: k.id, name: k.name, key: k.key, active: true, last_used_at: undefined, created_at: k.created_at }, ...p]);
+            reset();
+            loadFirst().catch((e) => toast.error(e.message));
             setShowCreate(false);
           }}
           orgId={orgId!}

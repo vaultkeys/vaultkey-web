@@ -18,6 +18,8 @@ import { formatDate, cn } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { RotateSecretResponse, TestWebhookResponse, WebhookConfig, WebhookDelivery, WebhookStats } from "@/lib/api";
 import { WebhookStatCard } from "@/components/shared/StatCard";
+import { usePagedCursor } from "@/hooks/usePagedCursor";
+import { Pagination } from "@/components/shared/Pagination";
 
 
 export default function WebhookPage() {
@@ -48,12 +50,6 @@ export default function WebhookPage() {
   // Delete state
   const [deleting, setDeleting] = useState(false);
 
-  // Delivery log state
-  const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
-  const [deliveriesLoading, setDeliveriesLoading] = useState(false);
-  const [deliveriesMore, setDeliveriesMore] = useState(false);
-  const [deliveriesCursor, setDeliveriesCursor] = useState<string | null>(null);
-  const [deliveriesLoadingMore, setDeliveriesLoadingMore] = useState(false);
   const [failedOnly, setFailedOnly] = useState(false);
   const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
 
@@ -79,33 +75,30 @@ export default function WebhookPage() {
     }
   }, [orgId, _baseUrl]);
 
-  const loadDeliveries = useCallback(async (reset = false) => {
-    if (!orgId || !_baseUrl) return;
-    if (reset) {
-      setDeliveriesLoading(true);
-      setDeliveries([]);
-      setDeliveriesCursor(null);
-    } else {
-      setDeliveriesLoadingMore(true);
-    }
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const cursor = reset ? undefined : deliveriesCursor ?? undefined;
-      const res = await cloud.listWebhookDeliveries(token, orgId, cursor, 20, failedOnly);
-      setDeliveries((p) => reset ? res.deliveries : [...p, ...res.deliveries]);
-      setDeliveriesCursor(res.next_cursor);
-      setDeliveriesMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setDeliveriesLoading(false);
-      setDeliveriesLoadingMore(false);
-    }
-  }, [orgId, _baseUrl, failedOnly, deliveriesCursor]);
+  const deliveryFetcher = useCallback(async (cursor: string | undefined) => {
+  const token = await getToken();
+  if (!token) return { items: [], next_cursor: null, has_more: false };
+    const res = await cloud.listWebhookDeliveries(token, orgId!, cursor, 20, failedOnly);
+    return { items: res.deliveries, next_cursor: res.next_cursor, has_more: res.has_more };
+  }, [orgId, getToken, cloud, failedOnly]);
+
+  const {
+    items: deliveries,
+    currentPage: deliveriesPage,
+    totalKnownPages: deliveriesTotalPages,
+    hasMore: deliveriesMore,
+    loading: deliveriesLoading,
+    goToPage: goToDeliveryPage,
+    loadFirst: loadDeliveriesFirst,
+    reset: resetDeliveries,
+  } = usePagedCursor<WebhookDelivery>({ fetcher: deliveryFetcher });
 
   useEffect(() => { loadConfig(); }, [loadConfig]);
-  useEffect(() => { loadDeliveries(true); }, [orgId, failedOnly, _baseUrl]);
+  useEffect(() => {
+    if (!orgId || !_baseUrl) return;
+    resetDeliveries();
+    loadDeliveriesFirst().catch((e) => toast.error(e.message));
+  }, [orgId, failedOnly, _baseUrl]);
 
   const saveUrl = async () => {
     if (!orgId) return;
@@ -406,7 +399,7 @@ export default function WebhookPage() {
                 Failed only
               </label>
               <button
-                onClick={() => loadDeliveries(true)}
+                onClick={() => { resetDeliveries(); loadDeliveriesFirst().catch((e) => toast.error(e.message)); }}
                 className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
@@ -435,7 +428,13 @@ export default function WebhookPage() {
                   />
                 ))}
               </div>
-              <LoadMore hasMore={deliveriesMore} loading={deliveriesLoadingMore} onLoadMore={() => loadDeliveries(false)} />
+              <Pagination 
+                currentPage={deliveriesPage} 
+                totalKnownPages={deliveriesTotalPages} 
+                hasMore={deliveriesMore} 
+                loading={deliveriesLoading} 
+                onPage={(p) => { setExpandedDelivery(null); goToDeliveryPage(p); }}
+              />
             </>
           )}
         </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Plus, Fuel, AlertTriangle, Trash2, Info } from "lucide-react";
@@ -12,67 +12,37 @@ import { useChains } from "@/hooks/useChains";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CopyButton } from "@/components/shared/CopyButton";
-import { LoadMore } from "@/components/shared/LoadMore";
 import { shortAddress, cn } from "@/lib/utils";
 import { StatusBadgeBoolean } from "@/components/shared/StatusBadge";
 import ChainBadge from "@/components/shared/ChainBadge";
+import { usePagedCursor } from "@/hooks/usePagedCursor";
+import { Pagination } from "@/components/shared/Pagination";
 
 export default function RelayersPage() {
   const { getToken } = useAuth();
   const { orgId } = useOrg();
   const { cloud } = useApi();
 
-  const [relayers, setRelayers] = useState<Relayer[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const router = useRouter();
+
+  const fetcher = useCallback(async (cursor: string | undefined) => {
+  const token = await getToken();
+  if (!token) return { items: [], next_cursor: null, has_more: false };
+    const res = await cloud.listRelayers(token, orgId!, cursor);
+    return { items: res.relayers, next_cursor: res.next_cursor, has_more: res.has_more };
+  }, [orgId, getToken, cloud]);
+
+  const { items: relayers, currentPage, totalKnownPages, hasMore, loading, goToPage, loadFirst, reset } = usePagedCursor<Relayer>({ fetcher });
 
   // Ensure chains are loaded as soon as this page mounts.
   const { ensureChains } = useChains();
   useEffect(() => { ensureChains(); }, [ensureChains]);
 
-  const load = async () => {
-    if (!orgId) return;
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listRelayers(token, orgId);
-      setRelayers(res.relayers);
-      setNextCursor(res.next_cursor);
-      setHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadMore = async () => {
-    if (!orgId || !nextCursor || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listRelayers(token, orgId, nextCursor);
-      setRelayers((p) => [...p, ...res.relayers]);
-      setNextCursor(res.next_cursor);
-      setHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
-
   useEffect(() => {
-    setRelayers([]);
-    setNextCursor(null);
-    setHasMore(false);
-    setLoading(true);
-    load();
+    if (!orgId) return;
+    reset();
+    loadFirst().catch((e) => toast.error(e.message));
   }, [orgId]);
 
   const deactivate = async (relayerId: string, address: string) => {
@@ -81,7 +51,8 @@ export default function RelayersPage() {
       const token = await getToken();
       if (!token) return;
       await cloud.deactivateRelayer(token, orgId!, relayerId);
-      setRelayers((p) => p.filter((r) => r.id !== relayerId));
+      reset(); 
+      loadFirst();
       toast.success("Fee payer deactivated");
     } catch (e: any) {
       toast.error(e.message);
@@ -198,14 +169,14 @@ export default function RelayersPage() {
             ))}
           </div>
 
-          <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} />
+          <Pagination currentPage={currentPage} totalKnownPages={totalKnownPages} hasMore={hasMore} loading={loading} onPage={goToPage} />
         </>
       )}
 
       {showCreate && (
         <CreateRelayerModal
           onClose={() => setShowCreate(false)}
-          onCreated={(r) => { setRelayers((p) => [r, ...p]); setShowCreate(false); }}
+          onCreated={(r) => { reset(); loadFirst().catch((e) => toast.error(e.message)); setShowCreate(false); }}
           orgId={orgId!}
         />
       )}

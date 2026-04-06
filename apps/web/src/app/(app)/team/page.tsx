@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { Plus, UserMinus, Mail, X, FlaskConical, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -11,9 +11,10 @@ import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RoleBadge } from "@/components/shared/RoleBadge";
-import { LoadMore } from "@/components/shared/LoadMore";
 import { formatDate } from "@/lib/utils";
 import React from "react";
+import { usePagedCursor } from "@/hooks/usePagedCursor";
+import { Pagination } from "@/components/shared/Pagination";
 
 const ROLES = ["admin", "developer", "viewer"] as const;
 
@@ -24,89 +25,54 @@ export default function TeamPage() {
   const { isTestnet } = useEnv();
   const { cloud } = useApi();
 
-  const [members, setMembers] = useState<Member[]>([]);
-  const [membersCursor, setMembersCursor] = useState<string | null>(null);
-  const [membersHasMore, setMembersHasMore] = useState(false);
-  const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
-
-  const [invites, setInvites] = useState<Invite[]>([]);
-  const [invitesCursor, setInvitesCursor] = useState<string | null>(null);
-  const [invitesHasMore, setInvitesHasMore] = useState(false);
-  const [loadingMoreInvites, setLoadingMoreInvites] = useState(false);
-
-  const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
 
-  const load = async () => {
-    if (!orgId) return;
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const [mRes, iRes] = await Promise.all([
-        cloud.listMembers(token, orgId),
-        cloud.listInvites(token, orgId),
-      ]);
-      setMembers(mRes.members);
-      setMembersCursor(mRes.next_cursor);
-      setMembersHasMore(mRes.has_more);
+  const memberFetcher = useCallback(async (cursor: string | undefined) => {
+  const token = await getToken();
+  if (!token) return { items: [], next_cursor: null, has_more: false };
+    const res = await cloud.listMembers(token, orgId!, cursor);
+    return { items: res.members, next_cursor: res.next_cursor, has_more: res.has_more };
+  }, [orgId, getToken, cloud]);
 
-      const pending = iRes.invites.filter((i) => !i.accepted_at);
-      setInvites(pending);
-      setInvitesCursor(iRes.next_cursor);
-      // has_more refers to raw invites — we can't know how many pending remain
-      // without fetching, so we keep the cursor and let the user load more.
-      setInvitesHasMore(iRes.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    items: members,
+    currentPage: membersPage,
+    totalKnownPages: membersTotalPages,
+    hasMore: membersHasMore,
+    loading: membersLoading,
+    goToPage: goToMembersPage,
+    loadFirst: loadMembersFirst,
+    reset: resetMembers,
+  } = usePagedCursor<Member>({ fetcher: memberFetcher });
 
-  const loadMoreMembers = async () => {
-    if (!orgId || !membersCursor || loadingMoreMembers) return;
-    setLoadingMoreMembers(true);
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listMembers(token, orgId, membersCursor);
-      setMembers((p) => [...p, ...res.members]);
-      setMembersCursor(res.next_cursor);
-      setMembersHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoadingMoreMembers(false);
-    }
-  };
+  const inviteFetcher = useCallback(async (cursor: string | undefined) => {
+    const token = await getToken();
+    if (!token) return { items: [], next_cursor: null, has_more: false };
+    const res = await cloud.listInvites(token, orgId!, cursor);
+    return {
+      items: res.invites.filter((i) => !i.accepted_at),
+      next_cursor: res.next_cursor,
+      has_more: res.has_more,
+    };
+  }, [orgId, getToken, cloud]);
 
-  const loadMoreInvites = async () => {
-    if (!orgId || !invitesCursor || loadingMoreInvites) return;
-    setLoadingMoreInvites(true);
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await cloud.listInvites(token, orgId, invitesCursor);
-      const pending = res.invites.filter((i) => !i.accepted_at);
-      setInvites((p) => [...p, ...pending]);
-      setInvitesCursor(res.next_cursor);
-      setInvitesHasMore(res.has_more);
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setLoadingMoreInvites(false);
-    }
-  };
+  const {
+    items: invites,
+    currentPage: invitesPage,
+    totalKnownPages: invitesTotalPages,
+    hasMore: invitesHasMore,
+    loading: invitesLoading,
+    goToPage: goToInvitesPage,
+    loadFirst: loadInvitesFirst,
+    reset: resetInvites,
+  } = usePagedCursor<Invite>({ fetcher: inviteFetcher });
 
   useEffect(() => {
-    setMembers([]);
-    setMembersCursor(null);
-    setMembersHasMore(false);
-    setInvites([]);
-    setInvitesCursor(null);
-    setInvitesHasMore(false);
-    setLoading(true);
-    load();
+    if (!orgId) return;
+    resetMembers();
+    resetInvites();
+    Promise.all([loadMembersFirst(), loadInvitesFirst()])
+      .catch((e) => toast.error(e.message));
   }, [orgId]);
 
   const removeMember = async (clerkUserId: string, name: string) => {
@@ -115,7 +81,8 @@ export default function TeamPage() {
       const token = await getToken();
       if (!token) return;
       await cloud.removeMember(token, orgId!, clerkUserId);
-      setMembers((p) => p.filter((m) => m.clerk_user_id !== clerkUserId));
+      resetMembers();
+      loadMembersFirst().catch((e) => toast.error(e.message));
       toast.success("Member removed");
     } catch (e: any) {
       toast.error(e.message);
@@ -127,9 +94,8 @@ export default function TeamPage() {
       const token = await getToken();
       if (!token) return;
       const updated = await cloud.updateMember(token, orgId!, clerkUserId, role);
-      setMembers((p) =>
-        p.map((m) => (m.clerk_user_id === clerkUserId ? { ...m, role: updated.role } : m))
-      );
+      resetMembers();
+      loadMembersFirst().catch((e) => toast.error(e.message));
       toast.success("Role updated");
     } catch (e: any) {
       toast.error(e.message);
@@ -142,7 +108,8 @@ export default function TeamPage() {
       const token = await getToken();
       if (!token) return;
       await cloud.revokeInvite(token, orgId!, inviteToken);
-      setInvites((p) => p.filter((i) => i.token !== inviteToken));
+      resetInvites();
+      loadInvitesFirst().catch((e) => toast.error(e.message));
       toast.success("Invite revoked");
     } catch (e: any) {
       toast.error(e.message);
@@ -188,7 +155,7 @@ export default function TeamPage() {
         <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
           Members ({members.length}{membersHasMore ? "+" : ""})
         </p>
-        {loading ? (
+        {membersLoading && members.length === 0 ? (
           <TeamSkeleton />
         ) : members.length === 0 ? (
           <EmptyState icon={<Mail className="h-8 w-8" />} title="No members" />
@@ -308,7 +275,7 @@ export default function TeamPage() {
               })}
             </div>
 
-            <LoadMore hasMore={membersHasMore} loading={loadingMoreMembers} onLoadMore={loadMoreMembers} />
+            <Pagination currentPage={membersPage} totalKnownPages={membersTotalPages} hasMore={membersHasMore} loading={membersLoading} onPage={goToMembersPage} />
           </>
         )}
       </div>
@@ -393,7 +360,7 @@ export default function TeamPage() {
             ))}
           </div>
 
-          <LoadMore hasMore={invitesHasMore} loading={loadingMoreInvites} onLoadMore={loadMoreInvites} />
+          <Pagination currentPage={membersPage} totalKnownPages={membersTotalPages} hasMore={membersHasMore} loading={membersLoading} onPage={goToMembersPage} />
         </div>
       )}
 
@@ -401,7 +368,8 @@ export default function TeamPage() {
         <InviteModal
           onClose={() => setShowInvite(false)}
           onInvited={(inv) => {
-            setInvites((p) => [inv, ...p]);
+            resetInvites();
+            loadInvitesFirst().catch((e) => toast.error(e.message));
             setShowInvite(false);
           }}
           orgId={orgId!}
