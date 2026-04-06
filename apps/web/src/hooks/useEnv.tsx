@@ -8,6 +8,7 @@ interface EnvCtx {
   env: Env;
   setEnv: (e: Env) => void;
   isTestnet: boolean;
+  mainnetEnabled: boolean;
   mainnetUrl: string;
   testnetUrl: string;
   baseUrl: string;
@@ -18,10 +19,14 @@ const MAINNET_URL = process.env.NEXT_PUBLIC_MAINNET_BACKEND_URL ?? "http://local
 const TESTNET_URL = process.env.NEXT_PUBLIC_TESTNET_BACKEND_URL ?? "http://localhost:8081";
 const STORAGE_KEY = "vaultkey_env";
 
+// true only when the env var is explicitly configured
+const MAINNET_ENABLED = Boolean(process.env.NEXT_PUBLIC_MAINNET_BACKEND_URL);
+
 const EnvContext = createContext<EnvCtx>({
   env: "testnet",
   setEnv: () => {},
   isTestnet: true,
+  mainnetEnabled: MAINNET_ENABLED,
   mainnetUrl: MAINNET_URL,
   testnetUrl: TESTNET_URL,
   baseUrl: TESTNET_URL,
@@ -36,9 +41,12 @@ export function EnvProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) as Env | null;
-      if (stored === "testnet" || stored === "mainnet") {
-        setEnvState(stored);
+      if (stored === "mainnet" && MAINNET_ENABLED) {
+        setEnvState("mainnet");
+      } else if (stored === "testnet") {
+        setEnvState("testnet");
       }
+      // if stored is "mainnet" but MAINNET_ENABLED is false, stays "testnet"
     } catch {}
     setHydrated(true);
   }, []);
@@ -55,6 +63,7 @@ export function EnvProvider({ children }: { children: React.ReactNode }) {
       env,
       setEnv,
       isTestnet: env === "testnet",
+      mainnetEnabled: MAINNET_ENABLED,
       mainnetUrl: MAINNET_URL,
       testnetUrl: TESTNET_URL,
       baseUrl,

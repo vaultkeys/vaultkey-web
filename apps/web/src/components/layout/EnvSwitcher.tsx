@@ -10,12 +10,14 @@ import React from "react";
  * Pill-style: two options side by side with an animated active indicator.
  */
 export function EnvSwitcher() {
-  const { env, setEnv } = useEnv();
+  const { env, setEnv, mainnetEnabled } = useEnv();
 
-  const options: { value: Env; label: string; Icon: React.ElementType }[] = [
-    { value: "mainnet", label: "Mainnet", Icon: Globe },
-    { value: "testnet", label: "Testnet", Icon: FlaskConical },
+  const allOptions = [
+    { value: "mainnet" as Env, label: "Mainnet", Icon: Globe },
+    { value: "testnet" as Env, label: "Testnet", Icon: FlaskConical },
   ];
+
+  const options = allOptions.filter(o => o.value !== "mainnet" || mainnetEnabled);
 
   return (
     <div className="mx-2 mb-2">
