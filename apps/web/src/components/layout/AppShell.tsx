@@ -58,10 +58,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => { document.body.style.overflow = ""; };
   }, [sidebarOpen]);
 
-  if (!orgLoading && needsOnboarding && !pathname.startsWith("/onboarding")) {
-    router.replace("/onboarding");
-  }
-
   const SidebarContent = () => (
     <>
       {/* Logo */}
