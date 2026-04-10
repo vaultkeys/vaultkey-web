@@ -149,6 +149,27 @@ export interface Chain {
   legacy_symbol?: string;
 }
 
+export interface PlanInfo {
+  id: string;
+  display_name: string;
+  tier: string;           // "free" | "starter" | "pro" | "scale" | "business"
+  interval: string;       // "monthly" | "yearly" | "two_year"
+  price_cents: number;
+  monthly_credits: number;
+  rate_limit_rps: number;
+}
+
+export interface OrgSubscription {
+  org_id: string;
+  status: string;         // "free" | "active" | "past_due" | "canceled" | "unpaid"
+  monthly_credits: number;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  suspended_at?: string | null;
+  suspension_reason?: string | null;
+  plan: PlanInfo | null;  // null = free tier
+}
+
 // ── Paginated response wrapper ────────────────────────────────────────────────
 
 export type Paginated<K extends string, T> = {
@@ -208,8 +229,16 @@ export function makeCloud(baseUrl: string) {
     createPaymentIntent: (token: string, body: { amount_cents: number; currency: string }) =>
       req<PaymentIntentRes>(baseUrl, "/cloud/billing/purchase", { method: "POST", body: JSON.stringify(body), token }),
 
+    createCheckoutSession: (token: string, orgId: string, body: { price_id: string; return_url: string }) =>
+      req<{ client_secret: string }>(baseUrl, `/cloud/organizations/${orgId}/billing/subscribe`, {
+        method: "POST", body: JSON.stringify(body), token,
+      }),
+
     getBillingHistory: (token: string, orgId: string) =>
       req<BillingHistory>(baseUrl, `/cloud/organizations/${orgId}/billing/history`, { token }),
+
+    getSubscription: (token: string, orgId: string) =>
+      req<OrgSubscription>(baseUrl, `/cloud/organizations/${orgId}/subscription`, { token }),
 
     getUsage: (token: string, orgId: string, params?: { start?: string; end?: string; breakdown?: string }) => {
       const qs = new URLSearchParams(params as Record<string, string>).toString();
