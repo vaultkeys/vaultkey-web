@@ -297,23 +297,6 @@ function Features() {
 }
 
 function Pricing() {
-  const freePerks = [
-    "Testnet environment — free forever",
-    "Up to 500 wallet operations per month",
-    "EVM + Solana wallet creation",
-    "1 organization",
-    "1 team member",
-  ];
-
-  const paidPerks = [
-    "$10 monthly usage credits included",
-    "Wallet creation at 1 credit each",
-    "Stablecoin transfers at 5 credits each",
-    "Unlimited organizations",
-    "Unlimited domains and API keys",
-    "Unlimited team members",
-  ];
-
   return (
     <section id="pricing" className="py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-6">
@@ -322,66 +305,19 @@ function Pricing() {
             Pricing
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            pay for what you use — the most affordable custodial wallet platform
+            Free to start. Scale when you need to. No seat fees, no hidden costs.
           </p>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <PricingCard
-            title="Free"
-            price="$0"
-            note="testnet, forever"
-            perks={freePerks}
-          />
-          <PricingCard
-            title="Paid"
-            price="$10"
-            note="minimum usage per month"
-            perks={paidPerks}
-          />
         </div>
 
         <div className="mt-8">
           <PricingCalculator />
         </div>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          100% money-back guarantee · Credits don&apos;t roll over · Payments via Stripe
+        </p>
       </div>
     </section>
-  );
-}
-
-type PricingCardProps = {
-  title: string;
-  price: string;
-  note: string;
-  perks: string[];
-};
-
-function PricingCard({ title, price, note, perks }: PricingCardProps) {
-  return (
-    <div className="rounded-[18px] bg-primary/20 p-1">
-      <div className="h-full rounded-[14px] bg-primary/20 p-0.5 shadow-sm">
-        <div className="bg-background rounded-xl h-full flex flex-col p-5">
-          <h3 className="font-medium">{title}</h3>
-          <div className="mt-2 text-4xl text-primary">{price}</div>
-          <div className="text-xs text-muted-foreground">{note}</div>
-          <ul className="mt-4 space-y-2 text-sm mb-20">
-            {perks.map((perk) => (
-              <li key={perk} className="flex items-start gap-2">
-                <CheckIcon className="w-4 h-4 mt-0.5 text-primary" />
-                <span>{perk}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-auto pt-6">
-            <Button>
-              <a href={APP_URL} target="_blank" rel="noopener noreferrer">
-                Get started
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
