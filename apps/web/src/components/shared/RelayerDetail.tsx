@@ -13,6 +13,7 @@ import { useChains } from "@/hooks/useChains";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { StatusBadgeBoolean } from "@/components/shared/StatusBadge";
 import ChainBadge from "@/components/shared/ChainBadge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 import { formatRelayerBalance } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +47,7 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
 
   // Deactivate state
   const [deactivating, setDeactivating] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Derive native symbol from chain registry for display.
   const nativeSymbol = relayer.chain_type === "solana"
@@ -112,7 +114,6 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
   // ── Deactivate ──────────────────────────────────────────────────────────────
 
   const deactivate = async () => {
-    if (!confirm(`Deactivate this fee payer? It will stop paying gas for transactions.`)) return;
     setDeactivating(true);
     try {
       const token = await getToken();
@@ -124,6 +125,7 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
       toast.error(e.message ?? "Failed to deactivate");
     } finally {
       setDeactivating(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -321,7 +323,7 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
               </p>
             </div>
             <button
-              onClick={deactivate}
+              onClick={() => setConfirmOpen(true)}
               disabled={deactivating}
               className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-red-500/30 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
             >
@@ -331,6 +333,25 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
           </div>
         </div>
       )}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deactivate fee payer?</DialogTitle>
+            <DialogDescription>
+              This wallet will stop paying gas for transactions. This cannot be undone from the dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+            </DialogClose>
+            <button onClick={deactivate} disabled={deactivating} className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 transition-colors">
+              {deactivating ? "Deactivating…" : "Deactivate"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

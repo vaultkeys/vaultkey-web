@@ -20,6 +20,7 @@ import { RotateSecretResponse, TestWebhookResponse, WebhookConfig, WebhookDelive
 import { WebhookStatCard } from "@/components/shared/StatCard";
 import { usePagedCursor } from "@/hooks/usePagedCursor";
 import { Pagination } from "@/components/shared/Pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 
 
 export default function WebhookPage() {
@@ -32,6 +33,7 @@ export default function WebhookPage() {
   const [config, setConfig] = useState<WebhookConfig | null>(null);
   const [stats, setStats] = useState<WebhookStats | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
+  const [confirmAction, setConfirmAction] = useState<{ type: "delete" | "rotate" } | null>(null);
 
   // URL editor state
   const [urlInput, setUrlInput] = useState("");
@@ -122,7 +124,7 @@ export default function WebhookPage() {
   };
 
   const deleteWebhook = async () => {
-    if (!orgId || !confirm("Remove the webhook configuration? This clears the URL and signing secret.")) return;
+    if (!orgId) return;
     setDeleting(true);
     try {
       const token = await getToken();
@@ -136,12 +138,12 @@ export default function WebhookPage() {
       toast.error(e.message);
     } finally {
       setDeleting(false);
+      setConfirmAction(null);
     }
   };
 
   const rotateSecret = async () => {
     if (!orgId) return;
-    if (!confirm("Rotate the signing secret? Your previous secret will remain valid for 1 hour.")) return;
     setRotating(true);
     try {
       const token = await getToken();
@@ -155,6 +157,7 @@ export default function WebhookPage() {
       toast.error(e.message);
     } finally {
       setRotating(false);
+      setConfirmAction(null);
     }
   };
 
@@ -201,7 +204,7 @@ export default function WebhookPage() {
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Endpoint</p>
           {hasUrl && (
             <button
-              onClick={deleteWebhook}
+              onClick={() => setConfirmAction({ type: "delete" })}
               disabled={deleting}
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
             >
@@ -270,7 +273,7 @@ export default function WebhookPage() {
               {testing ? "Sending…" : "Send test"}
             </button>
             <button
-              onClick={rotateSecret}
+              onClick={() => setConfirmAction({ type: "rotate" })}
               disabled={rotating}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border border-border hover:bg-accent transition-colors"
             >
@@ -439,6 +442,32 @@ export default function WebhookPage() {
           )}
         </section>
       )}
+
+      <Dialog open={!!confirmAction} onOpenChange={(open) => { if (!open) setConfirmAction(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmAction?.type === "delete" ? "Remove webhook?" : "Rotate signing secret?"}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmAction?.type === "delete"
+                ? "This clears the URL and signing secret. You can reconfigure at any time."
+                : "Your previous secret will remain valid for 1 hour after rotation."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+            </DialogClose>
+            <button
+              onClick={confirmAction?.type === "delete" ? deleteWebhook : rotateSecret}
+              className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            >
+              {confirmAction?.type === "delete" ? "Remove" : "Rotate"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

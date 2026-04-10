@@ -15,6 +15,7 @@ import { formatDate } from "@/lib/utils";
 import React from "react";
 import { usePagedCursor } from "@/hooks/usePagedCursor";
 import { Pagination } from "@/components/shared/Pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 
 const ROLES = ["admin", "developer", "viewer"] as const;
 
@@ -26,6 +27,8 @@ export default function TeamPage() {
   const { cloud } = useApi();
 
   const [showInvite, setShowInvite] = useState(false);
+  const [confirmMember, setConfirmMember] = useState<Member | null>(null);
+  const [confirmInvite, setConfirmInvite] = useState<Invite | null>(null);
 
   const memberFetcher = useCallback(async (cursor: string | undefined) => {
   const token = await getToken();
@@ -75,17 +78,23 @@ export default function TeamPage() {
       .catch((e) => toast.error(e.message));
   }, [orgId]);
 
-  const removeMember = async (clerkUserId: string, name: string) => {
-    if (!confirm(`Remove ${name} from the organization?`)) return;
+  const removeMember = async (member: Member) => {
+    setConfirmMember(member);
+  };
+
+  const confirmRemoveMember = async () => {
+    if (!confirmMember) return;
     try {
       const token = await getToken();
       if (!token) return;
-      await cloud.removeMember(token, orgId!, clerkUserId);
+      await cloud.removeMember(token, orgId!, confirmMember.clerk_user_id);
       resetMembers();
       loadMembersFirst().catch((e) => toast.error(e.message));
       toast.success("Member removed");
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setConfirmMember(null);
     }
   };
 
@@ -102,17 +111,23 @@ export default function TeamPage() {
     }
   };
 
-  const revokeInvite = async (inviteToken: string) => {
-    if (!confirm("Revoke this invitation? The link in the email will stop working.")) return;
+  const revokeInvite = async (invite: Invite) => {
+    setConfirmInvite(invite);
+  };
+
+  const confirmRevokeInvite = async () => {
+    if (!confirmInvite) return;
     try {
       const token = await getToken();
       if (!token) return;
-      await cloud.revokeInvite(token, orgId!, inviteToken);
+      await cloud.revokeInvite(token, orgId!, confirmInvite.token);
       resetInvites();
       loadInvitesFirst().catch((e) => toast.error(e.message));
       toast.success("Invite revoked");
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setConfirmInvite(null);
     }
   };
 
@@ -215,7 +230,7 @@ export default function TeamPage() {
                         <td className="px-4 py-3 text-right">
                           {canManage && !isOwner && !isMe && (
                             <button
-                              onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
+                              onClick={() => removeMember(m)}
                               className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                               title="Remove member"
                             >
@@ -262,7 +277,7 @@ export default function TeamPage() {
                         )}
                         {canManage && !isOwner && !isMe && (
                           <button
-                            onClick={() => removeMember(m.clerk_user_id, `${m.first_name} ${m.last_name}`)}
+                            onClick={() => removeMember(m)}
                             className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                           >
                             <UserMinus className="h-3.5 w-3.5" />
@@ -316,7 +331,7 @@ export default function TeamPage() {
                         <div className="flex items-center justify-end gap-1">
                           <CopyInviteLinkButton token={inv.token} />
                           <button
-                            onClick={() => revokeInvite(inv.token)}
+                            onClick={() => revokeInvite(inv)}
                             className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                             title="Revoke invite"
                           >
@@ -349,7 +364,7 @@ export default function TeamPage() {
                   <div className="flex items-center gap-1 shrink-0">
                     <CopyInviteLinkButton token={inv.token} />
                     <button
-                      onClick={() => revokeInvite(inv.token)}
+                      onClick={() => revokeInvite(inv)}
                       className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -361,6 +376,44 @@ export default function TeamPage() {
           </div>
 
           <Pagination currentPage={membersPage} totalKnownPages={membersTotalPages} hasMore={membersHasMore} loading={membersLoading} onPage={goToMembersPage} />
+
+          <Dialog open={!!confirmMember} onOpenChange={(open) => { if (!open) setConfirmMember(null); }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Remove {confirmMember?.first_name} {confirmMember?.last_name}?</DialogTitle>
+                <DialogDescription>
+                  They will lose access to this organization immediately.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+                </DialogClose>
+                <button onClick={confirmRemoveMember} className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+                  Remove
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={!!confirmInvite} onOpenChange={(open) => { if (!open) setConfirmInvite(null); }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Revoke invite for {confirmInvite?.email}?</DialogTitle>
+                <DialogDescription>
+                  The link in the email will stop working immediately.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+                </DialogClose>
+                <button onClick={confirmRevokeInvite} className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+                  Revoke
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 

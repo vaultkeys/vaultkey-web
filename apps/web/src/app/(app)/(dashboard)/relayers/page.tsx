@@ -17,6 +17,7 @@ import { StatusBadgeBoolean } from "@/components/shared/StatusBadge";
 import ChainBadge from "@/components/shared/ChainBadge";
 import { usePagedCursor } from "@/hooks/usePagedCursor";
 import { Pagination } from "@/components/shared/Pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 
 export default function RelayersPage() {
   const { getToken } = useAuth();
@@ -24,6 +25,7 @@ export default function RelayersPage() {
   const { cloud } = useApi();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [confirmRelayer, setConfirmRelayer] = useState<Relayer | null>(null);
   const router = useRouter();
 
   const fetcher = useCallback(async (cursor: string | undefined) => {
@@ -45,17 +47,23 @@ export default function RelayersPage() {
     loadFirst().catch((e) => toast.error(e.message));
   }, [orgId]);
 
-  const deactivate = async (relayerId: string, address: string) => {
-    if (!confirm(`Deactivate fee payer ${shortAddress(address)}? It will stop paying gas for transactions.`)) return;
+  const deactivate = async (relayer: Relayer) => {
+    setConfirmRelayer(relayer);
+  };
+
+  const confirmDeactivate = async () => {
+    if (!confirmRelayer) return;
     try {
       const token = await getToken();
       if (!token) return;
-      await cloud.deactivateRelayer(token, orgId!, relayerId);
-      reset(); 
+      await cloud.deactivateRelayer(token, orgId!, confirmRelayer.id);
+      reset();
       loadFirst();
       toast.success("Fee payer deactivated");
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setConfirmRelayer(null);
     }
   };
 
@@ -133,7 +141,7 @@ export default function RelayersPage() {
                     </td>
                     <td className="px-4 py-3"><StatusBadgeBoolean active={r.active} resultIfYes="Active" resultIfNo="Inactive" /></td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={(e) => { e.stopPropagation(); deactivate(r.id, r.address); }} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); deactivate(r); }} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </td>
@@ -162,7 +170,7 @@ export default function RelayersPage() {
                   <ChainBadge chain={r.chain_type} chainId={r.chain_id} />
                   <span className="font-mono">Alert: {r.min_balance_alert} {r.chain_type === "evm" ? "ETH" : "SOL"}</span>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); deactivate(r.id, r.address); }} className="w-full mt-2 px-3 py-1.5 rounded-md text-xs border border-border hover:bg-destructive/10 hover:text-destructive transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); deactivate(r); }} className="w-full mt-2 px-3 py-1.5 rounded-md text-xs border border-border hover:bg-destructive/10 hover:text-destructive transition-colors">
                   Deactivate
                 </button>
               </div>
@@ -180,6 +188,25 @@ export default function RelayersPage() {
           orgId={orgId!}
         />
       )}
+
+      <Dialog open={!!confirmRelayer} onOpenChange={(open) => { if (!open) setConfirmRelayer(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deactivate fee payer?</DialogTitle>
+            <DialogDescription>
+              <span className="font-mono text-xs">{shortAddress(confirmRelayer?.address ?? "")}</span> will stop paying gas for transactions. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+            </DialogClose>
+            <button onClick={confirmDeactivate} className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+              Deactivate
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 {
-  "extends": "@usesend/typescript-config/react-library.json",
+  "extends": "@vaultkey/typescript-config/react-library.json",
   "compilerOptions": {
+    "jsx": "react",
     "outDir": "dist"
   },
   "include": ["**/*.tsx", "**/*.ts"],

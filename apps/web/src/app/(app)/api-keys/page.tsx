@@ -13,6 +13,7 @@ import { formatDate } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { usePagedCursor } from "@/hooks/usePagedCursor";
 import { Pagination } from "@/components/shared/Pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 
 export default function ApiKeysPage() {
   const { getToken } = useAuth();
@@ -21,6 +22,7 @@ export default function ApiKeysPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [justCreated, setJustCreated] = useState<ApiKeyCreated | null>(null);
+  const [confirmKey, setConfirmKey] = useState<ApiKey | null>(null);
 
   const fetcher = useCallback(async (cursor: string | undefined) => {
   const token = await getToken();
@@ -37,17 +39,23 @@ export default function ApiKeysPage() {
     loadFirst().catch((e) => toast.error(e.message));
   }, [orgId]);
 
-  const revoke = async (keyId: string, keyName: string) => {
-    if (!confirm(`Revoke "${keyName}"? This cannot be undone.`)) return;
+  const revoke = async (key: ApiKey) => {
+    setConfirmKey(key);
+  };
+
+  const confirmRevoke = async () => {
+    if (!confirmKey) return;
     try {
       const token = await getToken();
       if (!token) return;
-      await cloud.revokeApiKey(token, orgId!, keyId);
-      reset(); 
+      await cloud.revokeApiKey(token, orgId!, confirmKey.id);
+      reset();
       loadFirst();
       toast.success("API key revoked");
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setConfirmKey(null);
     }
   };
 
@@ -130,7 +138,7 @@ export default function ApiKeysPage() {
                     <td className="px-4 py-3 text-xs text-muted-foreground">{k.last_used_at ? formatDate(k.last_used_at) : "Never"}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(k.created_at)}</td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => revoke(k.id, k.name)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                      <button onClick={() => revoke(k)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </td>
@@ -152,7 +160,7 @@ export default function ApiKeysPage() {
                       <CopyButton value={k.key} />
                     </div>
                   </div>
-                  <button onClick={() => revoke(k.id, k.name)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0">
+                  <button onClick={() => revoke(k)} className="p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -180,6 +188,25 @@ export default function ApiKeysPage() {
           orgId={orgId!}
         />
       )}
+
+      <Dialog open={!!confirmKey} onOpenChange={(open) => { if (!open) setConfirmKey(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke "{confirmKey?.name}"?</DialogTitle>
+            <DialogDescription>
+              This API key will stop working immediately. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
+            </DialogClose>
+            <button onClick={confirmRevoke} className="px-4 py-2 rounded-md text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+              Revoke
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
