@@ -314,7 +314,7 @@ function Pricing() {
         </div>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          100% money-back guarantee · Credits don&apos;t roll over · Payments via Stripe
+          100% money-back guarantee · Credits don&apos;t roll over · No hidden fees
         </p>
       </div>
     </section>
