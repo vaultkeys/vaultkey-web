@@ -269,6 +269,13 @@ export function makeCloud(baseUrl: string) {
     ) =>
       req<void>(baseUrl, `/cloud/organizations/${orgId}/master-wallet/${configId}`, { method: "PATCH", body: JSON.stringify(body), token }),
 
+    listWallets: (token: string, orgId: string, userId?: string, after?: string, limit?: number) =>
+      req<Paginated<"wallets", Wallet>>(
+        baseUrl,
+        `/cloud/organizations/${orgId}/wallets${buildQS({ user_id: userId, after, limit })}`,
+        { token },
+      ),
+
     // ── Webhook ────────────────────────────────────────────────────────────────
     getWebhook: (token: string, orgId: string) =>
       req<WebhookConfig>(baseUrl, `/cloud/organizations/${orgId}/webhook`, { token }),
