@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+
 
 export default function NotFound() {
   return (
@@ -16,12 +18,12 @@ export default function NotFound() {
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-sm w-full">
         {/* Logo */}
-        <p
-          className="text-base font-bold tracking-tight mb-10"
-          style={{ color: "hsl(var(--primary-light))" }}
-        >
-          VaultKey
-        </p>
+        <Image
+          src="/logo-squircle.png"
+          alt="vaultkey"
+          width={90}
+          height={90}
+        />
 
         {/* 404 display */}
         <div className="relative mb-6 select-none">

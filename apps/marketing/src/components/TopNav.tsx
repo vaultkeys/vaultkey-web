@@ -21,10 +21,7 @@ export function TopNav() {
     <header className="py-4 border-b border-border sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-sidebar-background/80">
       <div className="mx-auto max-w-6xl px-6 flex items-center justify-between gap-4 text-sm">
         <Link href="/" className="flex items-center gap-2 group">
-          {/* Replace /logo-squircle.png with VaultKey logo when available */}
-          <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="font-bold text-[10px] font-mono text-primary-foreground">VK</span>
-          </div>
+          <Image src="/logo-squircle.png" alt="VaultKey" width={24} height={24} />
           <span className="text-primary font-mono text-[16px] group-hover:opacity-90">
             VaultKey
           </span>

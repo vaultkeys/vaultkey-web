@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+import { Toaster } from "@vaultkey/ui/src/toaster";
+
 import "./globals.css";
 
 export const metadata: Metadata = {

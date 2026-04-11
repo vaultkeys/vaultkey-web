@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle, Loader2, LogIn, UserPlus } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
+import Image from "next/image";
+
 
 type State =
   | { phase: "loading" }
@@ -78,9 +80,12 @@ export default function AcceptInvitePage() {
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl text-center">
         {/* Logo */}
-        <p className="text-xl font-bold tracking-tight mb-8" style={{ color: "hsl(var(--primary-light))" }}>
-          VaultKey
-        </p>
+        <Image
+          src="/logo-squircle.png"
+          alt="vaultkey"
+          width={24}
+          height={24}
+        />
 
         {state.phase === "loading" && (
           <LoadingView label="Checking invite…" />

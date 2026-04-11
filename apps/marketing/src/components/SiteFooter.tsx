@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const REPO = "vaultkey/vaultkey";
 const REPO_URL = `https://github.com/${REPO}`;
@@ -11,11 +12,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex items-center gap-2 sm:w-56">
-            <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <span className="font-bold text-[10px] font-mono text-primary-foreground">
-                VK
-              </span>
-            </div>
+            <Image src="/logo-squircle.png" alt="VaultKey" width={24} height={24} />
             <span className="text-primary font-mono">VaultKey</span>
           </div>
 

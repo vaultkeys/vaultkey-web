@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
@@ -66,10 +67,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
           isTestnet ? "bg-yellow-500/20 border border-yellow-500/30" : "bg-primary",
         )}>
-          <span className={cn(
-            "font-bold text-xs font-mono",
-            isTestnet ? "text-yellow-600 dark:text-yellow-400" : "text-primary-foreground",
-          )}>VK</span>
+          <Image
+              src="/logo-squircle.png"
+              alt="vaultkey"
+              width={24}
+              height={24}
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-none truncate">VaultKey</p>
