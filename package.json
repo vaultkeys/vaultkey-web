@@ -15,17 +15,12 @@
     "test:web:api": "pnpm --filter=web test:api",
     "test:web:integration": "pnpm --filter=web test:integration",
     "test:web:integration:full": "pnpm test:infra:up && (pnpm --filter=web test:integration:full; code=$?; pnpm test:infra:down; exit $code)",
-    "test:infra:up": "docker compose -f docker/testing/compose.yml up -d --wait",
-    "test:infra:down": "docker compose -f docker/testing/compose.yml down -v",
     "dev:docs": "cd apps/docs && mintlify dev",
     "dev:marketing": "cd apps/marketing && turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "load-env": "dotenv -e .env",
     "d": "pnpm dx && pnpm dev",
-    "dx": "pnpm i && pnpm dx:up && pnpm db:migrate-dev",
-    "dx:up": "docker compose -f docker/dev/compose.yml up -d",
-    "dx:down": "docker compose -f docker/dev/compose.yml down",
     "kill-ports": "sudo fuser -k 3001/tcp 3002/tcp"
   },
   "devDependencies": {
