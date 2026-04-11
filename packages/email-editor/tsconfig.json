@@ -1,8 +1,0 @@
-{
-  "extends": "@vaultkey/typescript-config/react-library.json",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
-  "include": ["**/*.tsx", "**/*.ts"],
-  "exclude": ["node_modules", "dist"]
-}

@@ -7,7 +7,6 @@ export default {
   content: [
     "./src/**/*.tsx",
     `${path.join(require.resolve("@vaultkey/ui"), "..")}/**/*.{ts,tsx}`,
-    `${path.join(require.resolve("@vaultkey/email-editor"), "..")}/**/*.{ts,tsx}`,
   ],
 } satisfies Config;
 
