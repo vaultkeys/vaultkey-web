@@ -98,18 +98,18 @@ function LangIcon({ kind, className = "h-4 w-4" }: { kind: string; className?: s
         onError={() => setFailed(true)}
       />
     );
-  if (kind === "go")
-    return (
-      <Image
-        src="/go.svg"
-        alt="Go logo"
-        width={16}
-        height={16}
-        className={className}
-        priority={false}
-        onError={() => setFailed(true)}
-      />
-    );
+  // if (kind === "go")
+  //   return (
+  //     <Image
+  //       src="/go.svg"
+  //       alt="Go logo"
+  //       width={16}
+  //       height={16}
+  //       className={className}
+  //       priority={false}
+  //       onError={() => setFailed(true)}
+  //     />
+  //   );
   if (kind === "php")
     return (
       <Image

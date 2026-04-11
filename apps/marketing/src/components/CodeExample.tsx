@@ -3,96 +3,105 @@ import { CodeBlock } from "@vaultkey/ui/src/code-block";
 import { CodeBlockWithCopy } from "@vaultkey/ui/src/code-block-with-copy";
 import { LangToggle } from "./CodeLangToggle";
 
-const TS_CODE = `import { VaultKey } from "vaultkey-js";
+const TS_CODE = `import { VaultKey } from "@vaultkey/sdk";
 
-const vk = new VaultKey("vk_live_your_api_key");
+const vk = new VaultKey({
+  apiKey: "vk_live_your_api_key",
+  apiSecret: "your_api_secret",
+});
 
 // Create a custodial wallet
-const wallet = await vk.wallets.create({
-  user_id: "user_123",
-  chain_type: "evm",
+const { data: wallet } = await vk.wallets.create({
+  userId: "user_123",
+  chainType: "evm",
   label: "main",
 });
 
 // Send USDC on Polygon
-const job = await vk.wallets.stablecoinTransfer(wallet.id, "evm", {
+const { data: job } = await vk.stablecoin.transfer(wallet.id, {
   token: "usdc",
   to: "0xRecipientAddress",
   amount: "50.00",
-  chain_id: "137",
+  chainType: "evm",
+  chainName: "polygon",
 });
 
 // Poll for result
-const result = await vk.jobs.get(job.job_id);
+const { data: result } = await vk.jobs.get(job.jobId);
 console.log(result.status); // "completed"`;
 
 const PY_CODE = `from vaultkey import VaultKey
 
-vk = VaultKey("vk_live_your_api_key")
+vk = VaultKey(
+    api_key="vk_live_your_api_key",
+    api_secret="your_api_secret",
+)
 
 # Create a custodial wallet
-wallet = vk.wallets.create(
-    user_id="user_123",
-    chain_type="evm",
-    label="main",
-)
+wallet, err = vk.wallets.create({
+    "user_id": "user_123",
+    "chain_type": "evm",
+    "label": "main",
+})
 
 # Send USDC on Polygon
-job = vk.wallets.stablecoin_transfer(
-    wallet_id=wallet["id"],
-    chain_type="evm",
-    token="usdc",
-    to="0xRecipientAddress",
-    amount="50.00",
-    chain_id="137",
-)
+job, err = vk.stablecoin.transfer(wallet["id"], {
+    "token": "usdc",
+    "to": "0xRecipientAddress",
+    "amount": "50.00",
+    "chain_type": "evm",
+    "chain_name": "polygon",
+})
 
 # Poll for result
-result = vk.jobs.get(job["job_id"])
+result, err = vk.jobs.get(job["job_id"])
 print(result["status"])  # "completed"`;
 
-const GO_CODE = `package main
+// const GO_CODE = `package main
 
-import (
-    "fmt"
-    "io"
-    "net/http"
-    "strings"
-)
+// import (
+//     "fmt"
+//     "io"
+//     "net/http"
+//     "strings"
+// )
 
-func main() {
-    // Create a custodial wallet
-    walletPayload := strings.NewReader(\`{
-        "user_id": "user_123",
-        "chain_type": "evm",
-        "label": "main"
-    }\`)
-    req, _ := http.NewRequest("POST",
-        "https://api.vaultkey.dev/sdk/wallets",
-        walletPayload)
-    req.Header.Add("Content-Type", "application/json")
-    req.Header.Add("Authorization", "Bearer vk_live_your_api_key")
-    res, _ := http.DefaultClient.Do(req)
-    defer res.Body.Close()
-    body, _ := io.ReadAll(res.Body)
-    fmt.Println(string(body))
-}`;
+// func main() {
+//     // Create a custodial wallet
+//     walletPayload := strings.NewReader(\`{
+//         "user_id": "user_123",
+//         "chain_type": "evm",
+//         "label": "main"
+//     }\`)
+//     req, _ := http.NewRequest("POST",
+//         "https://app.vaultkeys.dev/api/v1/sdk/wallets",
+//         walletPayload)
+//     req.Header.Set("Content-Type", "application/json")
+//     req.Header.Set("X-API-Key", "vk_live_your_api_key")
+//     req.Header.Set("X-API-Secret", "your_api_secret")
+//     res, _ := http.DefaultClient.Do(req)
+//     defer res.Body.Close()
+//     body, _ := io.ReadAll(res.Body)
+//     fmt.Println(string(body))
+// }`;
 
 const CURL_CODE = `# Create a custodial wallet
-curl -X POST https://api.vaultkey.dev/sdk/wallets \\
-  -H "Authorization: Bearer vk_live_your_api_key" \\
+curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets \\
+  -H "X-API-Key: vk_live_your_api_key" \\
+  -H "X-API-Secret: your_api_secret" \\
   -H "Content-Type: application/json" \\
   -d '{"user_id":"user_123","chain_type":"evm","label":"main"}'
 
 # Send USDC on Polygon
-curl -X POST https://api.vaultkey.dev/sdk/wallets/{walletId}/stablecoin/transfer/evm \\
-  -H "Authorization: Bearer vk_live_your_api_key" \\
+curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets/{walletId}/stablecoin/transfer/evm \\
+  -H "X-API-Key: vk_live_your_api_key" \\
+  -H "X-API-Secret: your_api_secret" \\
   -H "Content-Type: application/json" \\
   -d '{
     "token": "usdc",
     "to": "0xRecipientAddress",
     "amount": "50.00",
-    "chain_id": "137"
+    "chain_name": "polygon"
   }'`;
 
 export function CodeExample() {
@@ -112,13 +121,13 @@ export function CodeExample() {
       shiki: "python" as const,
       code: PY_CODE,
     },
-    {
-      key: "go",
-      label: "Go",
-      kind: "go",
-      shiki: "go" as const,
-      code: GO_CODE,
-    },
+    // {
+    //   key: "go",
+    //   label: "Go",
+    //   kind: "go",
+    //   shiki: "go" as const,
+    //   code: GO_CODE,
+    // },
     {
       key: "curl",
       label: "cURL",

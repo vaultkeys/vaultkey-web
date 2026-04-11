@@ -69,7 +69,7 @@ function Hero() {
         </div>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Open source · Self-host ready · Free testnet tier
+          Open source · Free testnet tier
         </p>
 
         <div className="mt-32 mx-auto max-w-5xl">
@@ -333,12 +333,12 @@ function About() {
 
         <div className="mt-8 max-w-3xl mx-auto text-sm sm:text-base space-y-4">
           <p>
-            VaultKey provides open source custodial wallet infrastructure for
+            VaultKey provides custodial wallet infrastructure for
             developers who need to manage crypto wallets on behalf of their
             users. We handle key management, transaction signing, and stablecoin
             transfers — so you can focus on your product.
           </p>
-          <p>
+          {/* <p>
             VaultKey is bootstrapped and funded by the cloud offering. If you
             self-host VaultKey, please consider{" "}
             <a
@@ -350,7 +350,7 @@ function About() {
               sponsoring the project
             </a>
             .
-          </p>
+          </p> */}
         </div>
       </div>
     </section>

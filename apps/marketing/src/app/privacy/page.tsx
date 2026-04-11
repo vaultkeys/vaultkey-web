@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { TopNav } from "~/components/TopNav";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – useSend",
-  description: "Simple privacy policy for the useSend marketing site.",
+  title: "Privacy Policy – VaultKey",
+  description: "Privacy policy for the VaultKey website and API platform.",
 };
 
 export default function PrivacyPage() {
@@ -15,29 +15,29 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-muted-foreground mb-8">
-          This Privacy Policy explains how we collect, use, and share
-          information when you visit or interact with the useSend marketing
-          website at usesend.com. It also summarizes the limited information we
-          process when you sign up for our product and receive transactional or
-          occasional marketing emails.
+          This Privacy Policy explains how VaultKey ("we", "us") collects,
+          uses, and shares information when you visit our marketing website at
+          vaultkeys.dev, access our API, or use our wallet infrastructure
+          platform. Please read this policy carefully. If you have questions,
+          contact us at{" "}
+          <a
+            href="mailto:info@vaultkeys.dev"
+            className="underline decoration-dotted"
+          >
+            info@vaultkeys.dev
+          </a>
+          .
         </p>
 
         <section className="space-y-3 mb-8">
           <h2 className="text-xl font-medium">Who We Are</h2>
           <p className="text-muted-foreground">
-            useSend ("we", "us") operates the marketing website at
-            <span className="mx-1 font-mono">usesend.com</span>. The marketing
-            site is hosted on Vercel. Our application is hosted on Railway. We
-            are the controller of the information described in this policy for
-            the marketing site. If you have questions about this policy or your
-            data, contact us at
-            <a
-              href="mailto:hey@usesend.com"
-              className="ml-1 underline decoration-dotted"
-            >
-              hey@usesend.com
-            </a>
-            .
+            VaultKey operates the website at{" "}
+            <span className="font-mono">vaultkeys.dev</span> and the VaultKey
+            API platform, which provides custodial wallet infrastructure,
+            signing services, and stablecoin transfer capabilities to
+            developers and businesses. We are the data controller for the
+            information described in this policy.
           </p>
         </section>
 
@@ -48,26 +48,38 @@ export default function PrivacyPage() {
               <span className="text-foreground">
                 Usage and device data (marketing site):
               </span>{" "}
-              We use Simple Analytics to understand overall traffic and usage
-              patterns (e.g., pages visited, referrers, device type). Simple
-              Analytics is a privacy‑friendly analytics provider and does not
-              use cookies for tracking. Data is aggregated and not used to
-              identify you.
+              We use privacy-friendly analytics to understand overall traffic
+              and usage patterns such as pages visited, referrers, and device
+              type. This data is aggregated and not used to identify you
+              individually.
             </li>
             <li>
               <span className="text-foreground">Server and security logs:</span>{" "}
-              Our hosting providers (Vercel for the marketing site; Railway for
-              the app) may process IP addresses and basic request metadata
-              transiently for security, reliability, and debugging.
+              Our hosting providers may process IP addresses and basic request
+              metadata transiently for security, reliability, and debugging
+              purposes.
+            </li>
+            <li>
+              <span className="text-foreground">Account data:</span> When you
+              sign up for VaultKey, we collect information such as your name,
+              email address, and organization details necessary to create and
+              manage your account.
             </li>
             <li>
               <span className="text-foreground">
-                Account and email data (product):
+                API usage and platform data:
               </span>{" "}
-              If you sign up for useSend, we process your account information
-              and send transactional emails. If you opt in, we may also send
-              occasional marketing emails. You can unsubscribe at any time via
-              the link in those emails.
+              When you use the VaultKey API, we process data necessary to
+              deliver the service, including API keys, wallet identifiers,
+              blockchain addresses, transaction metadata, and job status
+              records. We do not store private keys in plaintext — keys are
+              encrypted at rest using a KMS provider.
+            </li>
+            <li>
+              <span className="text-foreground">Blockchain data:</span> Wallet
+              addresses and transaction hashes are inherently public on
+              blockchain networks. We are not responsible for information
+              visible on public blockchains.
             </li>
           </ul>
         </section>
@@ -75,14 +87,12 @@ export default function PrivacyPage() {
         <section className="space-y-3 mb-8">
           <h2 className="text-xl font-medium">How We Use Information</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li>Operate, secure, and maintain the marketing site and app.</li>
-            <li>
-              Understand aggregated usage to improve performance and content.
-            </li>
-            <li>
-              Deliver transactional emails related to your account or use.
-            </li>
-            <li>Send occasional marketing emails to subscribers who opt in.</li>
+            <li>Provide, operate, and maintain the VaultKey platform and API.</li>
+            <li>Authenticate requests and enforce API key access controls.</li>
+            <li>Process wallet creation, signing, sweep, and transfer operations.</li>
+            <li>Monitor platform health, security, and reliability.</li>
+            <li>Understand aggregated usage to improve performance and features.</li>
+            <li>Send transactional communications related to your account.</li>
             <li>Comply with legal obligations and enforce our terms.</li>
           </ul>
         </section>
@@ -90,10 +100,11 @@ export default function PrivacyPage() {
         <section className="space-y-3 mb-8">
           <h2 className="text-xl font-medium">Legal Bases</h2>
           <p className="text-muted-foreground">
-            Where applicable (e.g., in the EEA/UK), we rely on legitimate
-            interests to operate and secure our services and to measure
-            aggregated site usage, and on your consent for marketing emails. We
-            may rely on contract and legal obligation where relevant.
+            Where applicable (e.g., in the EEA/UK), we rely on contract
+            performance to provide the API and platform services you sign up
+            for, legitimate interests to operate and secure our infrastructure
+            and measure aggregated site usage, and legal obligation where
+            required by law.
           </p>
         </section>
 
@@ -105,35 +116,54 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>
-              <span className="text-foreground">Hosting:</span> Vercel
-              (marketing site) and Railway (application) for serving content,
-              networking, and security.
+              <span className="text-foreground">Hosting and infrastructure:</span>{" "}
+              Cloud providers for serving the API, database storage, and
+              security.
             </li>
             <li>
-              <span className="text-foreground">Analytics:</span> Simple
-              Analytics for aggregated, privacy‑friendly usage metrics on the
+              <span className="text-foreground">Key management:</span> KMS
+              providers (AWS KMS, GCP KMS, or HashiCorp Vault depending on
+              deployment) for encrypting and decrypting wallet keys.
+            </li>
+            <li>
+              <span className="text-foreground">Analytics:</span>{" "}
+              Privacy-friendly analytics for aggregated usage metrics on the
               marketing site.
             </li>
             <li>
-              <span className="text-foreground">Email delivery:</span> We send
-              transactional emails and, for subscribers who opt in, occasional
-              marketing emails.
+              <span className="text-foreground">Blockchain networks:</span>{" "}
+              RPC providers to broadcast transactions and query balances on
+              behalf of your wallets. Addresses and transaction data submitted
+              to these networks become publicly visible on-chain.
             </li>
           </ul>
           <p className="text-muted-foreground">
             We do not sell your personal information. We may disclose
-            information if required by law or to protect our rights, users, or
-            the public.
+            information if required by law, regulation, or to protect our
+            rights, users, or the public.
+          </p>
+        </section>
+
+        <section className="space-y-3 mb-8">
+          <h2 className="text-xl font-medium">Key Security</h2>
+          <p className="text-muted-foreground">
+            Wallet private keys generated through VaultKey are encrypted at
+            rest using a KMS provider and are never stored or logged in
+            plaintext. Signing operations are performed in memory and the
+            decrypted key material is not persisted after the operation
+            completes. You are responsible for securing your API keys and
+            secrets, which grant access to your wallets.
           </p>
         </section>
 
         <section className="space-y-3 mb-8">
           <h2 className="text-xl font-medium">Retention</h2>
           <p className="text-muted-foreground">
-            We retain information only for as long as necessary to fulfill the
-            purposes described in this policy, including security, analytics,
-            and legal compliance. Aggregated analytics do not identify
-            individuals.
+            We retain account and platform data for as long as your account is
+            active or as needed to provide the service, comply with legal
+            obligations, and resolve disputes. Aggregated analytics data does
+            not identify individuals. Job and transaction records may be
+            retained for audit and compliance purposes.
           </p>
         </section>
 
@@ -142,7 +172,8 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground">
             Our providers may process data in locations outside of your country
             of residence. Where required, we implement appropriate safeguards
-            for cross‑border transfers.
+            for cross-border transfers in accordance with applicable data
+            protection law.
           </p>
         </section>
 
@@ -152,23 +183,9 @@ export default function PrivacyPage() {
             Depending on your location, you may have rights to access, correct,
             delete, or export your information; to object to or restrict certain
             processing; and to withdraw consent where processing is based on
-            consent. To exercise these rights, contact us using the details on
-            our website. We may ask you to verify your identity before acting on
-            a request.
-          </p>
-        </section>
-
-        <section className="space-y-3 mb-8">
-          <h2 className="text-xl font-medium">Contact</h2>
-          <p className="text-muted-foreground">
-            For privacy requests or questions, email us at
-            <a
-              href="mailto:hey@usesend.com"
-              className="ml-1 underline decoration-dotted"
-            >
-              hey@usesend.com
-            </a>
-            .
+            consent. Note that certain data — such as transaction records
+            written to public blockchains — cannot be deleted by us. To exercise
+            your rights, contact us using the details below.
           </p>
         </section>
 
@@ -176,15 +193,31 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-medium">Children</h2>
           <p className="text-muted-foreground">
             Our services are not directed to children, and we do not knowingly
-            collect personal information from children.
+            collect personal information from anyone under 18.
+          </p>
+        </section>
+
+        <section className="space-y-3 mb-8">
+          <h2 className="text-xl font-medium">Changes</h2>
+          <p className="text-muted-foreground">
+            We may update this policy from time to time. The "Last updated"
+            date below reflects the most recent changes. Continued use of the
+            platform after changes are posted constitutes acceptance of the
+            updated policy.
           </p>
         </section>
 
         <section className="space-y-3 mb-10">
-          <h2 className="text-xl font-medium">Changes</h2>
+          <h2 className="text-xl font-medium">Contact</h2>
           <p className="text-muted-foreground">
-            We may update this policy from time to time. The "Last updated" date
-            below reflects the most recent changes.
+            For privacy requests or questions, email us at{" "}
+            <a
+              href="mailto:info@vaultkeys.dev"
+              className="underline decoration-dotted"
+            >
+              info@vaultkeys.dev
+            </a>
+            .
           </p>
         </section>
 
