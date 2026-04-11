@@ -35,7 +35,7 @@ function Hero() {
         <div className="flex justify-center mb-4">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-mono text-primary">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Open source · EVM + Solana
+            EVM + Solana + Tron
           </span>
         </div>
 
@@ -69,7 +69,7 @@ function Hero() {
         </div>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Open source · Free testnet tier
+          Free testnet tier
         </p>
 
         <div className="mt-32 mx-auto max-w-5xl">
@@ -116,7 +116,7 @@ function TrustedBy() {
     },
     {
       quote:
-        "Finally an open source custodial wallet layer that doesn't try to lock you in. The multi-chain support and KMS options made this an easy choice.",
+        "Finally a custodial wallet layer that doesn't try to lock you in. The multi-chain support and KMS options made this an easy choice.",
       author: "Tommerty",
       company: "doras.to",
       image:

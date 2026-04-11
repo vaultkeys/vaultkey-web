@@ -1,0 +1,86 @@
+export const metadata = {
+  title: "VaultKey Is Now in Beta | VaultKey",
+  description:
+    "VaultKey is officially open for signups. Create custodial wallets, sign transactions, and transfer stablecoins across EVM, Solana, and Tron — starting today.",
+  alternates: {
+    canonical: "https://vaultkeys.dev/update/beta-launch",
+  },
+  openGraph: {
+    title: "VaultKey Is Now in Beta | VaultKey",
+    description:
+      "VaultKey is officially open for signups. Create custodial wallets, sign transactions, and transfer stablecoins across EVM, Solana, and Tron — starting today.",
+    type: "article",
+    url: "https://vaultkeys.dev/update/beta-launch",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VaultKey Is Now in Beta | VaultKey",
+    description:
+      "VaultKey is officially open for signups. Create custodial wallets, sign transactions, and transfer stablecoins across EVM, Solana, and Tron — starting today.",
+  },
+};
+
+# VaultKey Is Now in Beta
+
+Today we're opening VaultKey to everyone. You can sign up, create your organization, and start building with custodial wallet infrastructure right now.
+
+## What VaultKey does
+
+VaultKey lets you create and manage custodial wallets for your users without dealing with key management, chain integrations, or signing infrastructure yourself. You get a simple API and typed SDKs — we handle the rest.
+
+With VaultKey you can:
+
+- **Create wallets** for your users across EVM chains, Solana, and Tron.
+- **Sign messages and transactions** asynchronously — submit a job, poll for the result.
+- **Transfer stablecoins** (USDC, USDT) with optional gasless support via our relayer.
+- **Sweep funds** to a master wallet on demand.
+- **Check balances** for native tokens and stablecoins across any supported chain.
+
+Private keys are encrypted at rest using a KMS provider and never stored or logged in plaintext. Signing happens in memory and the decrypted key material is discarded immediately after.
+
+## Supported networks
+
+- **EVM** — Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche, BSC, Linea, Scroll, zkSync, and their testnets.
+- **Solana** — Mainnet and Devnet.
+- **Tron** — Mainnet.
+
+## SDKs
+
+We're launching with official SDKs for TypeScript and Python so you can get up and running without touching raw HTTP.
+
+```ts
+import { VaultKey } from "@vaultkey/sdk";
+
+const vk = new VaultKey({ apiKey: "vk_live_...", apiSecret: "..." });
+
+const { data: wallet } = await vk.wallets.create({
+  userId: "user_123",
+  chainType: "evm",
+});
+```
+
+```python
+from vaultkey import VaultKey
+
+vk = VaultKey(api_key="vk_live_...", api_secret="...")
+wallet, err = vk.wallets.create({"user_id": "user_123", "chain_type": "evm"})
+```
+
+## What to expect in beta
+
+This is a real production system — not a sandbox. That said, it is still beta, and there are things we are still building. You may encounter rough edges, and we want to hear about them.
+
+We are starting with a free tier so you can explore the platform without a credit card. Paid credits unlock higher limits and additional operations.
+
+## What's coming next
+
+- More chain support.
+- SDK support for additional languages.
+- Expanded stablecoin and token support.
+- Deeper webhook event coverage.
+
+## To our first users
+
+Thank you for signing up early. Your feedback during this period will directly shape the product. If something is broken, confusing, or missing — please tell us.
+
+Reach out at [juslen@vaultkeys.dev](mailto:juslen@vaultkeys.dev) or open an issue on GitHub.

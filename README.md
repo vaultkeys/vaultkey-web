@@ -24,7 +24,7 @@
 
 ## About
 
-VaultKey is open source custodial wallet infrastructure. It lets you create and manage EVM and Solana wallets, sign messages and transactions, sweep funds, and transfer stablecoins — all through a simple REST API and typed SDKs.
+VaultKey is custodial wallet infrastructure. It lets you create and manage EVM and Solana wallets, sign messages and transactions, sweep funds, and transfer stablecoins — all through a simple REST API and typed SDKs.
 
 You own the infrastructure. Keys are encrypted at rest using your choice of KMS provider (AWS KMS, GCP KMS, or HashiCorp Vault). No plaintext keys are ever stored or logged.
 
