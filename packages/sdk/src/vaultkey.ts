@@ -4,7 +4,19 @@ import { Jobs } from "./jobs";
 import { Stablecoin } from "./stablecoin";
 import { Chains } from "./chains";
 
-const DEFAULT_BASE_URL = "https://app.vaultkeys.dev";
+const MAINNET_BASE_URL = "https://app.vaultkeys.com";
+const TESTNET_BASE_URL = "https://testnet.vaultkeys.com";
+
+/**
+ * Resolve the base URL from the API key prefix.
+ * - testnet_ keys  → https://testnet.vaultkeys.com
+ * - vk_live_ keys  → https://app.vaultkeys.com
+ * - explicit baseUrl override always wins.
+ */
+function resolveBaseUrl(apiKey: string, override?: string): string {
+  if (override) return override;
+  return apiKey.startsWith("testnet_") ? TESTNET_BASE_URL : MAINNET_BASE_URL;
+}
 
 type RequestOptions = {
   headers?: HeadersInit;
@@ -24,6 +36,10 @@ export interface VaultKeyConfig {
    * Your VaultKey API key.
    * Testnet keys start with `testnet_`, live keys start with `vk_live_`.
    * Falls back to the VAULTKEY_API_KEY environment variable.
+   *
+   * The SDK automatically routes requests to the correct endpoint:
+   * - `testnet_` → https://testnet.vaultkeys.dev
+   * - `vk_live_` → https://app.vaultkeys.dev
    */
   apiKey?: string;
 
@@ -35,7 +51,7 @@ export interface VaultKeyConfig {
 
   /**
    * Override the base URL. Useful for self-hosted deployments or proxies.
-   * Defaults to https://app.vaultkeys.dev
+   * When set, this takes precedence over the automatic key-based routing.
    */
   baseUrl?: string;
 }
@@ -84,33 +100,9 @@ export class VaultKey {
       );
     }
 
-    // Warn on likely key/environment mismatches — the server will reject
-    // these anyway, but a client-side hint saves a round-trip.
-    if (
-      typeof process !== "undefined" &&
-      process.env?.ENVIRONMENT === "mainnet" &&
-      apiKey.startsWith("testnet_")
-    ) {
-      console.warn(
-        "[VaultKey] Warning: testnet API key detected but ENVIRONMENT is mainnet. " +
-          "Requests will be rejected by the server."
-      );
-    }
-
-    if (
-      typeof process !== "undefined" &&
-      process.env?.ENVIRONMENT === "testnet" &&
-      apiKey.startsWith("vk_live_")
-    ) {
-      console.warn(
-        "[VaultKey] Warning: live API key detected but ENVIRONMENT is testnet. " +
-          "Requests will be rejected by the server."
-      );
-    }
-
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
-    this.baseUrl = `${config.baseUrl ?? DEFAULT_BASE_URL}/api/v1/sdk`;
+    this.baseUrl = `${resolveBaseUrl(apiKey, config.baseUrl)}/api/v1/sdk`;
 
     this.wallets = new Wallets(this);
     this.jobs = new Jobs(this);

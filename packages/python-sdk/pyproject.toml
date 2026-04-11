@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "usesend"
-version = "0.2.10"
-description = "Python SDK for the UseSend API"
-authors = ["UseSend"]
+name = "vaultkey"
+version = "1.0.0"
+description = "Python SDK for the VaultKey API"
+authors = ["VaultKey"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "usesend" }]
-include = ["usesend/py.typed"]
+packages = [{ include = "vaultkey" }]
+include = ["vaultkey/py.typed"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
