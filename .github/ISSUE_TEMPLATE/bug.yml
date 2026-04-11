@@ -23,17 +23,6 @@ body:
     validations:
       required: false
   - type: dropdown
-    id: kind
-    attributes:
-      label: Self hosted or Cloud?
-      description: Does this happen on app.usesend.com or on your own instance?
-      options:
-        - Cloud
-        - Self hosted
-      default: 0
-    validations:
-      required: true
-  - type: dropdown
     id: browsers
     attributes:
       label: What browsers are you seeing the problem on?
