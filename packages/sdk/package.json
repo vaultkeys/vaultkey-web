@@ -1,10 +1,10 @@
 {
-  "name": "vaultkey-js",
-  "version": "1.6.3",
-  "description": "",
+  "name": "@vaultkey/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for the VaultKey API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/usesend/useSend"
+    "url": "https://github.com/vaultkey/vaultkey-web"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -13,23 +13,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --max-warnings 0",
     "build": "tsup",
-    "publish-sdk": "pnpm run build && npm publish --access public --no-git-checks",
-    "openapi-typegen": "openapi-typescript ../../apps/docs/api-reference/openapi.json -o types/schema.d.ts"
+    "publish-sdk": "pnpm run build && npm publish --access public --no-git-checks"
   },
-  "keywords": [],
+  "keywords": ["vaultkey", "crypto", "wallet", "web3", "sdk"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.15.2",
-    "@types/react": "^19.1.2",
     "@vaultkey/eslint-config": "workspace:*",
     "@vaultkey/typescript-config": "workspace:*",
-    "openapi-typescript": "^7.6.1",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   },
-  "dependencies": {
-    "@react-email/render": "^1.0.6",
-    "react": "^19.1.0"
-  }
+  "dependencies": {}
 }
