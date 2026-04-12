@@ -135,7 +135,7 @@ export default function TeamPage() {
   const canManage = myRole === "owner" || myRole === "admin";
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title="Team"
         description="Manage members and pending invitations"

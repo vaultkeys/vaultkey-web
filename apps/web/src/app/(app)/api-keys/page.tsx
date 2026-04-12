@@ -60,7 +60,7 @@ export default function ApiKeysPage() {
   };
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title="API Keys"
         description="Project keys authenticate SDK requests. The secret is shown once only."

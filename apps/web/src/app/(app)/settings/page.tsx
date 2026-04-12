@@ -62,7 +62,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="p-4 sm:p-8 max-w-2xl">
+    <div className="p-6 space-y-6 max-w-2xl">
       <PageHeader title="Settings" description="Manage your organization details" />
 
       <section className="rounded-xl border border-border bg-card p-4 sm:p-6 mb-6">

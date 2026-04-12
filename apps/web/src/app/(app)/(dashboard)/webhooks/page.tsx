@@ -182,7 +182,7 @@ export default function WebhookPage() {
   const hasUrl = !!(config?.url);
 
   return (
-    <div className="p-4 sm:p-8 max-w-3xl">
+    <div className="p-6 space-y-6 max-w-3xl">
       <PageHeader
         title="Webhooks"
         description="Receive real-time notifications when jobs complete, fail, or change state."

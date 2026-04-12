@@ -68,7 +68,7 @@ export default function RelayersPage() {
   };
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title="Fee Payers"
         description="Wallets that pay gas fees for your users' transactions. Enable gasless experiences."

@@ -1,16 +1,15 @@
 "use client";
 
 import { useEnv, type Env } from "@/hooks/useEnv";
+import { useSidebar } from "@vaultkey/ui/src/sidebar";
 import { cn } from "@/lib/utils";
 import { FlaskConical, Globe } from "lucide-react";
 import React from "react";
 
-/**
- * Compact environment toggle shown in the sidebar.
- * Pill-style: two options side by side with an animated active indicator.
- */
 export function EnvSwitcher() {
   const { env, setEnv, mainnetEnabled } = useEnv();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
 
   const allOptions = [
     { value: "mainnet" as Env, label: "Mainnet", Icon: Globe },
@@ -18,6 +17,30 @@ export function EnvSwitcher() {
   ];
 
   const options = allOptions.filter(o => o.value !== "mainnet" || mainnetEnabled);
+
+  // Collapsed: just show the active env as a single icon button
+  if (collapsed) {
+    const active = options.find(o => o.value === env)!;
+    return (
+      <div className="flex justify-center py-2">
+        <button
+          className={cn(
+            "flex items-center justify-center rounded-md p-2 transition-all duration-150",
+            env === "testnet"
+              ? "bg-yellow-500/15 text-yellow-500 border border-yellow-500/25"
+              : "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border",
+          )}
+          onClick={() => {
+            const next = options.find(o => o.value !== env);
+            if (next) setEnv(next.value);
+          }}
+          title={`Switch to ${options.find(o => o.value !== env)?.label ?? ""}`}
+        >
+          <active.Icon className="h-4 w-4 shrink-0" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-2 mb-2">

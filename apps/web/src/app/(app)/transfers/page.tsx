@@ -69,7 +69,7 @@ export default function TransfersPage() {
   };
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title="Stablecoin Transfers"
         description="Send USDC or USDT from a custodial wallet. Returns a job ID — poll for result."

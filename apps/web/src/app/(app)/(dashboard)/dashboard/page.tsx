@@ -60,7 +60,7 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title={`${org.name}`}
         description="Last 30 days · stablecoin infrastructure overview"

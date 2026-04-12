@@ -294,7 +294,7 @@ export default function BillingPage() {
   const isSuspended = !!subscription?.suspended_at;
 
   return (
-    <div className="p-8">
+    <div className="p-6 space-y-6">
       <PageHeader
         title="Billing & Credits"
         description={
