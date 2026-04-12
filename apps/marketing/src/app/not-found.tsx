@@ -35,7 +35,7 @@ export default function NotFound() {
               letterSpacing: "-4px",
             }}
           >
-            404
+            404 
           </span>
           {/* Teal accent line under the number */}
           <div
