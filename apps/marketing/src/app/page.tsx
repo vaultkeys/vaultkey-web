@@ -10,7 +10,7 @@ import CodeExample from "~/components/CodeExample";
 
 const APP_URL = "https://app.vaultkey.dev";
 const DOCS_URL = "https://docs.vaultkey.dev";
-const REPO = "vaultkey/vaultkey";
+const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
 
 export default function Page() {

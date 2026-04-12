@@ -57,46 +57,64 @@ job, err = vk.stablecoin.transfer(wallet["id"], {
 result, err = vk.jobs.get(job["job_id"])
 print(result["status"])  # "completed"`;
 
-// const GO_CODE = `package main
+const GO_CODE = `package main
 
-// import (
-//     "fmt"
-//     "io"
-//     "net/http"
-//     "strings"
-// )
+import (
+    "context"
+    "log"
 
-// func main() {
-//     // Create a custodial wallet
-//     walletPayload := strings.NewReader(\`{
-//         "user_id": "user_123",
-//         "chain_type": "evm",
-//         "label": "main"
-//     }\`)
-//     req, _ := http.NewRequest("POST",
-//         "https://app.vaultkeys.dev/api/v1/sdk/wallets",
-//         walletPayload)
-//     req.Header.Set("Content-Type", "application/json")
-//     req.Header.Set("X-API-Key", "vk_live_your_api_key")
-//     req.Header.Set("X-API-Secret", "your_api_secret")
-//     res, _ := http.DefaultClient.Do(req)
-//     defer res.Body.Close()
-//     body, _ := io.ReadAll(res.Body)
-//     fmt.Println(string(body))
-// }`;
+    vaultkey "github.com/vaultkey/vaultkey-go"
+)
+
+func main() {
+    vk, err := vaultkey.NewClient("vk_live_your_api_key", "your_api_secret")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a custodial wallet
+    wallet, apiErr, err := vk.Wallets.Create(ctx, vaultkey.CreateWalletPayload{
+        UserID:    "user_123",
+        ChainType: vaultkey.ChainTypeEVM,
+        Label:     "main",
+    })
+    if err != nil || apiErr != nil {
+        log.Fatal(err, apiErr)
+    }
+
+    // Send USDC on Polygon
+    job, apiErr, err := vk.Stablecoin.Transfer(ctx, wallet.ID,
+        vaultkey.ChainTypeEVM,
+        vaultkey.StablecoinTransferPayload{
+            Token:     "usdc",
+            To:        "0xRecipientAddress",
+            Amount:    "50.00",
+            ChainName: "polygon",
+        },
+    )
+    if err != nil || apiErr != nil {
+        log.Fatal(err, apiErr)
+    }
+
+    // Poll for result
+    result, _, _ := vk.Jobs.Get(ctx, job.JobID)
+    log.Println(result.Status) // "completed"
+}`;
 
 const CURL_CODE = `# Create a custodial wallet
-curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets \\
-  -H "X-API-Key: vk_live_your_api_key" \\
-  -H "X-API-Secret: your_api_secret" \\
-  -H "Content-Type: application/json" \\
+curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets \
+  -H "X-API-Key: vk_live_your_api_key" \
+  -H "X-API-Secret: your_api_secret" \
+  -H "Content-Type: application/json" \
   -d '{"user_id":"user_123","chain_type":"evm","label":"main"}'
 
 # Send USDC on Polygon
-curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets/{walletId}/stablecoin/transfer/evm \\
-  -H "X-API-Key: vk_live_your_api_key" \\
-  -H "X-API-Secret: your_api_secret" \\
-  -H "Content-Type: application/json" \\
+curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets/{walletId}/stablecoin/transfer/evm \
+  -H "X-API-Key: vk_live_your_api_key" \
+  -H "X-API-Secret: your_api_secret" \
+  -H "Content-Type: application/json" \
   -d '{
     "token": "usdc",
     "to": "0xRecipientAddress",
@@ -121,13 +139,13 @@ export function CodeExample() {
       shiki: "python" as const,
       code: PY_CODE,
     },
-    // {
-    //   key: "go",
-    //   label: "Go",
-    //   kind: "go",
-    //   shiki: "go" as const,
-    //   code: GO_CODE,
-    // },
+    {
+      key: "go",
+      label: "Go",
+      kind: "go",
+      shiki: "go" as const,
+      code: GO_CODE,
+    },
     {
       key: "curl",
       label: "cURL",
@@ -192,7 +210,7 @@ export function CodeExample() {
         <div className="mt-6 flex items-center justify-center gap-3">
           <Button size="lg" className="px-6">
             <a
-              href="https://docs.vaultkey.dev"
+              href="https://docs.vaultkeys.dev"
               target="_blank"
               rel="noopener noreferrer"
             >

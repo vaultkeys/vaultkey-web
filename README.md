@@ -13,13 +13,13 @@
     ·
     <a href="https://docs.vaultkeys.dev">Docs</a>
     ·
-    <a href="https://github.com/vaultkey/vaultkey-web/issues">Issues</a>
+    <a href="https://github.com/vaultkeys/vaultkey-web">Issues</a>
   </p>
 </p>
 
 <p align="center">
-   <a href="https://github.com/vaultkey/vaultkey-web/stargazers"><img src="https://img.shields.io/github/stars/vaultkey%2Fvaultkey" alt="GitHub Stars"></a>
-   <a href="https://github.com/vaultkey/vaultkey-web/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-purple" alt="License"></a>
+   <a href="https://github.com/vaultkeys/vaultkey-web/stargazers"><img src="https://img.shields.io/github/stars/vaultkey%2Fvaultkey" alt="GitHub Stars"></a>
+   <a href="https://github.com/vaultkeys/vaultkey-web/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-purple" alt="License"></a>
 </p>
 
 ## About
@@ -126,8 +126,8 @@ Full SDK docs at [docs.vaultkeys.dev](https://docs.vaultkeys.dev).
 ## Community and Next Steps 🎯
 
 - Check out the source code and test it.
-- Tell us what you think in [Discussions](https://github.com/vaultkey/vaultkey-web/discussions).
-- Fix or create [issues](https://github.com/vaultkey/vaultkey-web/issues).
+- Tell us what you think in [Discussions](https://github.com/vaultkeys/vaultkey-web/discussions).
+- Fix or create [issues](https://github.com/vaultkeys/vaultkey-web/issues).
 - ⭐ the repository to help raise awareness.
 
 ## Star History

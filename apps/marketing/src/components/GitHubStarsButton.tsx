@@ -1,6 +1,6 @@
 import { Button } from "@vaultkey/ui/src/button";
 
-const REPO = "vaultkey/vaultkey-web";
+const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
 const API_URL = `https://api.github.com/repos/${REPO}`;
 const REVALIDATE_SECONDS = 60 * 60 * 24 * 7; // 7 days

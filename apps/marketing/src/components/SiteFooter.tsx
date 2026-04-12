@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const REPO = "vaultkey/vaultkey";
+const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
 const APP_URL = "https://app.vaultkey.dev";
 const DOCS_URL = "https://docs.vaultkey.dev";

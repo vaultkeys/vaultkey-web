@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@vaultkey/ui/src/button";
 
-const REPO = "vaultkey/vaultkey";
+const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
 const APP_URL = "https://app.vaultkey.dev";
 const DOCS_URL = "https://docs.vaultkey.dev";

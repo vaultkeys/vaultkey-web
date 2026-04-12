@@ -4,7 +4,7 @@
   "description": "Official TypeScript SDK for the VaultKey API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaultkey/vaultkey-web"
+    "url": "git+https://github.com/vaultkeys/vaultkey-web.git"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -15,7 +15,13 @@
     "build": "tsup",
     "publish-sdk": "pnpm run build && npm publish --access public --no-git-checks"
   },
-  "keywords": ["vaultkey", "crypto", "wallet", "web3", "sdk"],
+  "keywords": [
+    "vaultkey",
+    "crypto",
+    "wallet",
+    "web3",
+    "sdk"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -25,5 +31,11 @@
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   },
-  "dependencies": {}
+  "directories": {
+    "example": "examples"
+  },
+  "bugs": {
+    "url": "https://github.com/vaultkeys/vaultkey-web/issues"
+  },
+  "homepage": "https://github.com/vaultkeys/vaultkey-web#readme"
 }
