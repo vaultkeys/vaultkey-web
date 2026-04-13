@@ -35,7 +35,8 @@ const stripePromise = loadStripe(
 type BillingInterval = "monthly" | "yearly" | "two_year";
 
 interface TierSlot {
-  cents: number;
+  cents: number;       // monthly-equivalent shown in UI
+  upfrontCents: number; // what Stripe actually charges (0 for monthly)
   credits: number;
   price_id: string;
 }
@@ -64,17 +65,17 @@ const TIERS: Tier[] = [
     id: "starter_49",
     name: "Starter",
     tier: "starter",
-    monthly:  { cents: 4900,  credits: 4_000_000,  price_id: "price_starter_49_mo"   },
-    yearly:   { cents: 2940,  credits: 4_000_000,  price_id: "price_starter_49_yr"   },
-    two_year: { cents: 2450,  credits: 4_000_000,  price_id: "price_starter_49_2yr"  },
+    monthly:  { cents: 4900,  upfrontCents: 0,      credits: 4_000_000,  price_id: "price_starter_49_mo"  },
+    yearly:   { cents: 2940,  upfrontCents: 35280,   credits: 4_000_000,  price_id: "price_starter_49_yr"  },
+    two_year: { cents: 2450,  upfrontCents: 58800,   credits: 4_000_000,  price_id: "price_starter_49_2yr" },
   },
   {
     id: "starter_79",
     name: "Starter",
     tier: "starter",
-    monthly:  { cents: 7900,  credits: 7_000_000,  price_id: "price_starter_79_mo"   },
-    yearly:   { cents: 4740,  credits: 7_000_000,  price_id: "price_starter_79_yr"   },
-    two_year: { cents: 3950,  credits: 7_000_000,  price_id: "price_starter_79_2yr"  },
+    monthly:  { cents: 7900,  upfrontCents: 0,      credits: 7_000_000,  price_id: "price_starter_79_mo"  },
+    yearly:   { cents: 4740,  upfrontCents: 56880,   credits: 7_000_000,  price_id: "price_starter_79_yr"  },
+    two_year: { cents: 3950,  upfrontCents: 94800,   credits: 7_000_000,  price_id: "price_starter_79_2yr" },
   },
   {
     id: "pro_99",
@@ -82,48 +83,54 @@ const TIERS: Tier[] = [
     tier: "pro",
     highlight: true,
     badge: "Most popular",
-    monthly:  { cents: 9900,  credits: 10_000_000, price_id: "price_pro_99_mo"       },
-    yearly:   { cents: 5940,  credits: 10_000_000, price_id: "price_pro_99_yr"       },
-    two_year: { cents: 4950,  credits: 10_000_000, price_id: "price_pro_99_2yr"      },
+    monthly:  { cents: 9900,  upfrontCents: 0,      credits: 10_000_000, price_id: "price_pro_99_mo"      },
+    yearly:   { cents: 5940,  upfrontCents: 71280,   credits: 10_000_000, price_id: "price_pro_99_yr"      },
+    two_year: { cents: 4950,  upfrontCents: 118800,  credits: 10_000_000, price_id: "price_pro_99_2yr"     },
   },
   {
     id: "pro_139",
     name: "Pro",
     tier: "pro",
-    monthly:  { cents: 13900, credits: 15_000_000, price_id: "price_pro_139_mo"      },
-    yearly:   { cents: 8340,  credits: 15_000_000, price_id: "price_pro_139_yr"      },
-    two_year: { cents: 6950,  credits: 15_000_000, price_id: "price_pro_139_2yr"     },
+    monthly:  { cents: 13900, upfrontCents: 0,      credits: 15_000_000, price_id: "price_pro_139_mo"     },
+    yearly:   { cents: 8340,  upfrontCents: 100080,  credits: 15_000_000, price_id: "price_pro_139_yr"     },
+    two_year: { cents: 6950,  upfrontCents: 166800,  credits: 15_000_000, price_id: "price_pro_139_2yr"    },
   },
   {
     id: "pro_179",
     name: "Pro",
     tier: "pro",
-    monthly:  { cents: 17900, credits: 20_000_000, price_id: "price_pro_179_mo"      },
-    yearly:   { cents: 10740, credits: 20_000_000, price_id: "price_pro_179_yr"      },
-    two_year: { cents: 8950,  credits: 20_000_000, price_id: "price_pro_179_2yr"     },
+    monthly:  { cents: 17900, upfrontCents: 0,      credits: 20_000_000, price_id: "price_pro_179_mo"     },
+    yearly:   { cents: 10740, upfrontCents: 128880,  credits: 20_000_000, price_id: "price_pro_179_yr"     },
+    two_year: { cents: 8950,  upfrontCents: 214800,  credits: 20_000_000, price_id: "price_pro_179_2yr"    },
   },
   {
     id: "scale_349",
     name: "Scale",
     tier: "scale",
-    monthly:  { cents: 34900, credits: 40_000_000, price_id: "price_scale_349_mo"    },
-    yearly:   { cents: 20940, credits: 40_000_000, price_id: "price_scale_349_yr"    },
-    two_year: { cents: 17450, credits: 40_000_000, price_id: "price_scale_349_2yr"   },
+    monthly:  { cents: 34900, upfrontCents: 0,      credits: 40_000_000, price_id: "price_scale_349_mo"   },
+    yearly:   { cents: 20940, upfrontCents: 251280,  credits: 40_000_000, price_id: "price_scale_349_yr"   },
+    two_year: { cents: 17450, upfrontCents: 418800,  credits: 40_000_000, price_id: "price_scale_349_2yr"  },
   },
   {
     id: "scale_649",
     name: "Scale",
     tier: "scale",
-    monthly:  { cents: 64900, credits: 80_000_000, price_id: "price_scale_649_mo"    },
-    yearly:   { cents: 38940, credits: 80_000_000, price_id: "price_scale_649_yr"    },
-    two_year: { cents: 32450, credits: 80_000_000, price_id: "price_scale_649_2yr"   },
+    monthly:  { cents: 64900, upfrontCents: 0,      credits: 80_000_000, price_id: "price_scale_649_mo"   },
+    yearly:   { cents: 38940, upfrontCents: 467280,  credits: 80_000_000, price_id: "price_scale_649_yr"   },
+    two_year: { cents: 32450, upfrontCents: 778800,  credits: 80_000_000, price_id: "price_scale_649_2yr"  },
   },
 ];
 
-const INTERVAL_LABELS: Record<BillingInterval, string> = {
-  monthly:  "Monthly",
-  yearly:   "Yearly (–40%)",
-  two_year: "2-Year (–50%)",
+const INTERVAL_LABELS: Record<BillingInterval, { label: string; badge?: string }> = {
+  monthly:  { label: "Monthly" },
+  yearly:   { label: "Yearly",   badge: "–40%" },
+  two_year: { label: "2-Year",   badge: "–50%" },
+};
+
+const UPFRONT_LABEL: Record<BillingInterval, string> = {
+  monthly:  "",
+  yearly:   "billed annually",
+  two_year: "billed every 2 years",
 };
 
 const FREE_FEATURES = [
@@ -388,21 +395,33 @@ export default function BillingPage() {
 
           {/* Interval toggle */}
           <div>
-            <div className="flex items-center gap-1 mb-6 w-fit rounded-lg border border-border bg-muted/30 p-1">
-              {(["monthly", "yearly", "two_year"] as BillingInterval[]).map((iv) => (
+           <div className="flex items-center gap-1 mb-6 w-fit rounded-lg border border-border bg-muted/30 p-1">
+            {(["monthly", "yearly", "two_year"] as BillingInterval[]).map((iv) => {
+              const { label, badge } = INTERVAL_LABELS[iv];
+              return (
                 <button
                   key={iv}
                   onClick={() => setInterval(iv)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     interval === iv
                       ? "bg-card text-foreground shadow-sm border border-border"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {INTERVAL_LABELS[iv]}
+                  {label}
+                  {badge && (
+                    <span className={`text-[10px] px-1 py-0.5 rounded font-semibold ${
+                      interval === iv
+                        ? "bg-green-500/15 text-green-400"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {badge}
+                    </span>
+                  )}
                 </button>
-              ))}
-            </div>
+              );
+            })}
+          </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <FreeTierCard active={!subscription?.plan} />
@@ -417,6 +436,7 @@ export default function BillingPage() {
                     key={tier.id}
                     tier={tier}
                     slot={slot}
+                    interval={interval}
                     isActive={isActive}
                     onSelect={() => setSelectedTier(tier)}
                   />
@@ -555,15 +575,21 @@ function FreeTierCard({ active }: { active: boolean }) {
 function TierCard({
   tier,
   slot,
+  interval,
   isActive,
   onSelect,
 }: {
   tier: Tier;
   slot: TierSlot | null;
+  interval: BillingInterval;
   isActive: boolean;
   onSelect: () => void;
 }) {
   if (!slot) return null;
+
+  const upfrontLabel = slot.upfrontCents > 0
+    ? `$${(slot.upfrontCents / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })} ${UPFRONT_LABEL[interval]}`
+    : null;
 
   return (
     <div
@@ -592,6 +618,9 @@ function TierCard({
           <span className="text-2xl font-bold">${slot.cents / 100}</span>
           <span className="text-xs text-muted-foreground">/mo</span>
         </div>
+        {upfrontLabel && (
+          <p className="text-xs text-muted-foreground mt-0.5">{upfrontLabel}</p>
+        )}
       </div>
 
       <p className="text-xs text-muted-foreground mb-4">
