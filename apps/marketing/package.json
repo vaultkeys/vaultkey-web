@@ -8,7 +8,7 @@
     "build": "next build",
     "build:cf": "npx @opennextjs/cloudflare",
     "deploy": "opennextjs-cloudflare build && wrangler pages deploy .open-next/assets --project-name=vaultkey-web-testnet",
-    "preview": "npm run build:cf && npx wrangler pages dev .open-next",
+    "preview": "pnpm build:cf && npx wrangler pages dev .open-next",
     "start": "next start",
     "lint": "eslint . --max-warnings 0"
   },
