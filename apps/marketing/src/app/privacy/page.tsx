@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground">
             VaultKey operates the website at{" "}
             <span className="font-mono">vaultkeys.dev</span> and the VaultKey
-            API platform, which provides custodial wallet infrastructure,
+            API platform, which provides wallet infrastructure,
             signing services, and stablecoin transfer capabilities to
             developers and businesses. We are the data controller for the
             information described in this policy.

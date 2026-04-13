@@ -10,7 +10,7 @@ const vk = new VaultKey({
   apiSecret: "your_api_secret",
 });
 
-// Create a custodial wallet
+// Create a wallet
 const { data: wallet } = await vk.wallets.create({
   userId: "user_123",
   chainType: "evm",
@@ -37,7 +37,7 @@ vk = VaultKey(
     api_secret="your_api_secret",
 )
 
-# Create a custodial wallet
+# Create a wallet
 wallet, err = vk.wallets.create({
     "user_id": "user_123",
     "chain_type": "evm",
@@ -74,7 +74,7 @@ func main() {
 
     ctx := context.Background()
 
-    // Create a custodial wallet
+    // Create wallet
     wallet, apiErr, err := vk.Wallets.Create(ctx, vaultkey.CreateWalletPayload{
         UserID:    "user_123",
         ChainType: vaultkey.ChainTypeEVM,
@@ -103,7 +103,7 @@ func main() {
     log.Println(result.Status) // "completed"
 }`;
 
-const CURL_CODE = `# Create a custodial wallet
+const CURL_CODE = `# Create a wallet
 curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets \
   -H "X-API-Key: vk_live_your_api_key" \
   -H "X-API-Secret: your_api_secret" \
@@ -163,8 +163,7 @@ export function CodeExample() {
             Developers
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            Typed SDKs and a simple REST API — integrate custodial wallets in
-            minutes, not weeks.
+            Typed SDKs and a simple REST API — integrate managed wallets in minutes, not weeks.
           </p>
         </div>
 

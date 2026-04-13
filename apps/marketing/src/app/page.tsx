@@ -40,7 +40,7 @@ function Hero() {
         </div>
 
         <h1 className="mt-4 text-center text-2xl sm:text-4xl font-semibold text-primary font-sans">
-          Custodial wallet infrastructure for every developer
+          Programmable wallet infrastructure for every developer
         </h1>
         <p className="mt-4 text-center text-base sm:text-lg font-sans max-w-2xl mx-auto">
           Create and manage wallets, sign transactions, and send stablecoins.{" "}
@@ -116,7 +116,7 @@ function TrustedBy() {
     },
     {
       quote:
-        "Finally a custodial wallet layer that doesn't try to lock you in. The multi-chain support and KMS options made this an easy choice.",
+        "Finally a wallet layer that doesn't try to lock you in. The multi-chain support and KMS options made this an easy choice.",
       author: "Tommerty",
       company: "doras.to",
       image:
@@ -238,7 +238,7 @@ function Features() {
       key: "feature-multichain",
       title: "EVM + Solana Support",
       content:
-        "Create and manage custodial wallets across all major EVM networks — Ethereum, Polygon, Arbitrum, Base, Optimism, BSC — and Solana. One unified API for both ecosystems.",
+        "Create and manage wallets across all major EVM networks — Ethereum, Polygon, Arbitrum, Base, Optimism, BSC — and Solana. One unified API for both ecosystems.",
       imageLightSrc: "/editor-light.webp",
       imageDarkSrc: "/editor-dark.webp",
     },
@@ -333,10 +333,10 @@ function About() {
 
         <div className="mt-8 max-w-3xl mx-auto text-sm sm:text-base space-y-4">
           <p>
-            VaultKey provides custodial wallet infrastructure for
-            developers who need to manage crypto wallets on behalf of their
-            users. We handle key management, transaction signing, and stablecoin
-            transfers — so you can focus on your product.
+            VaultKey provides wallet infrastructure for developers who need 
+            to create and manage wallets on behalf of their users. Keys are 
+            processed inside hardware security boundaries — never exposed to 
+            your application layer.
           </p>
           {/* <p>
             VaultKey is bootstrapped and funded by the cloud offering. If you

@@ -72,7 +72,7 @@ export default function TransfersPage() {
     <div className="p-6 space-y-6">
       <PageHeader
         title="Stablecoin Transfers"
-        description="Send USDC or USDT from a custodial wallet. Returns a job ID — poll for result."
+        description="Send USDC or USDT from a wallet. Returns a job ID — poll for result."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

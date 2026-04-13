@@ -17,13 +17,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VaultKey – custodial wallet infrastructure",
+  title: "VaultKey – programmable wallet infrastructure",
   description:
     "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   metadataBase: new URL("https://vaultkey.dev"),
   openGraph: {
-    title: "VaultKey – custodial wallet infrastructure",
+    title: "VaultKey – programmable wallet infrastructure",
     description:
       "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
     url: "https://vaultkey.dev",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
         url: "https://vaultkey.dev/og.png",
         width: 1200,
         height: 630,
-        alt: "VaultKey – custodial wallet infrastructure",
+        alt: "VaultKey – programmable wallet infrastructure",
         type: "image/png",
       },
     ],
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "VaultKey – custodial wallet infrastructure",
+    title: "VaultKey – programmable wallet infrastructure",
     description:
       "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins.",
     images: ["https://vaultkey.dev/og.png"],
