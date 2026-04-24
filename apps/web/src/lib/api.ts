@@ -143,7 +143,8 @@ export interface WebhookStats {
 
 export interface Chain {
   name: string;
-  chain_id: string;
+  chain_id?: string;        // optional — Solana and Tron chains have no numeric chain_id
+  chain_type: string;       // "evm" | "solana" | "tron"
   testnet: boolean;
   native_symbol: string;
   legacy_symbol?: string;
@@ -251,7 +252,7 @@ export function makeCloud(baseUrl: string) {
     registerRelayer: (
       token: string,
       orgId: string,
-      body: { chain_type: "evm" | "solana"; chain_id?: string; min_balance_alert?: string },
+      body: { chain_type: "evm" | "solana" | "tron"; chain_id?: string; min_balance_alert?: string },
     ) =>
       req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayer`, { method: "POST", body: JSON.stringify(body), token }),
 
@@ -343,7 +344,7 @@ export function makeCloud(baseUrl: string) {
       req<WebhookStats>(baseUrl, `/cloud/organizations/${orgId}/webhook/stats`, { token }),
 
     getChains: (token: string) =>
-    req<{ chains: Chain[]; environment: string }>(baseUrl, "/cloud/chains", { token }),
+      req<Chain[]>(baseUrl, "/cloud/chains", { token }),
   };
 }
 

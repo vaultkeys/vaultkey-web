@@ -38,8 +38,13 @@ export default function RelayersPage() {
   const { items: relayers, currentPage, totalKnownPages, hasMore, loading, goToPage, loadFirst, reset } = usePagedCursor<Relayer>({ fetcher });
 
   // Ensure chains are loaded as soon as this page mounts.
-  const { ensureChains } = useChains();
+  const { chains, chainsLoading, ensureChains } = useChains();
   useEffect(() => { ensureChains(); }, [ensureChains]);
+
+  useEffect(() => {
+    console.log("chains:", chains);
+    console.log("evmChains:", chains.filter((c) => c.chain_type === "evm"));
+  }, [chains]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -66,6 +71,12 @@ export default function RelayersPage() {
       setConfirmRelayer(null);
     }
   };
+
+  function nativeSymbolForRelayer(r: Relayer): string {
+    if (r.chain_type === "solana") return "SOL";
+    if (r.chain_type === "tron") return "TRX";
+    return "ETH";
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -137,7 +148,7 @@ export default function RelayersPage() {
                     </td>
                     <td className="px-4 py-3"><ChainBadge chain={r.chain_type} chainId={r.chain_id} /></td>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                      {r.min_balance_alert} {r.chain_type === "evm" ? "ETH" : "SOL"}
+                      {r.min_balance_alert} {nativeSymbolForRelayer(r)}
                     </td>
                     <td className="px-4 py-3"><StatusBadgeBoolean active={r.active} resultIfYes="Active" resultIfNo="Inactive" /></td>
                     <td className="px-4 py-3 text-right">
@@ -168,7 +179,7 @@ export default function RelayersPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                   <ChainBadge chain={r.chain_type} chainId={r.chain_id} />
-                  <span className="font-mono">Alert: {r.min_balance_alert} {r.chain_type === "evm" ? "ETH" : "SOL"}</span>
+                  <span className="font-mono">Alert: {r.min_balance_alert} {nativeSymbolForRelayer(r)}</span>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); deactivate(r); }} className="w-full mt-2 px-3 py-1.5 rounded-md text-xs border border-border hover:bg-destructive/10 hover:text-destructive transition-colors">
                   Deactivate
@@ -214,25 +225,42 @@ export default function RelayersPage() {
 function CreateRelayerModal({ onClose, onCreated, orgId }: { onClose: () => void; onCreated: (r: Relayer) => void; orgId: string }) {
   const { getToken } = useAuth();
   const { cloud } = useApi();
-  const { chains, chainsLoading } = useChains();
+  const { chains, chainsLoading, ensureChains } = useChains();
 
-  const [chainType, setChainType] = useState<"evm" | "solana">("evm");
+  const [chainType, setChainType] = useState<"evm" | "solana" | "tron">("evm");
   const [chainId, setChainId] = useState("");
   const [minBalanceAlert, setMinBalanceAlert] = useState("0.1");
   const [loading, setLoading] = useState(false);
 
-  // Set a sensible default chain ID once chains load.
   useEffect(() => {
-    if (chainId) return;
-    const evmChains = chains.filter((c) => c.chain_id !== "solana" && c.name !== "solana");
-    const defaultChainId = evmChains[0]?.chain_id;
-    if (defaultChainId) setChainId(defaultChainId);
-  }, [chains, chainId]);
+    ensureChains();
+  }, [ensureChains]);
 
-  const evmChains = chains.filter((c) => c.name !== "solana");
+  const evmChains = chains.filter((c) => c.chain_type === "evm");
+
+  useEffect(() => {
+    if (chainType !== "evm") {
+      setChainId("");
+      return;
+    }
+    const currentEvmChains = chains.filter((c) => c.chain_type === "evm");
+    const isValid = currentEvmChains.some((c) => c.chain_id === chainId);
+    if (!isValid && currentEvmChains.length > 0) {
+      setChainId(currentEvmChains[0]?.chain_id ?? "");
+    }
+  }, [chainType, chains]);
+
+  const nativeSymbol = (() => {
+    if (chainType === "solana") return "SOL";
+    if (chainType === "tron") return "TRX";
+    return evmChains.find((c) => c.chain_id === chainId)?.native_symbol ?? "ETH";
+  })();
 
   const submit = async () => {
-    if (chainType === "evm" && !chainId) { toast.error("Chain ID is required for EVM fee payers"); return; }
+    if (chainType === "evm" && !chainId) {
+      toast.error("Chain is required for EVM fee payers");
+      return;
+    }
     setLoading(true);
     try {
       const token = await getToken();
@@ -253,78 +281,99 @@ function CreateRelayerModal({ onClose, onCreated, orgId }: { onClose: () => void
 
   const inputCls = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30";
 
-  // Derive native symbol for alert threshold label.
-  const nativeSymbol = chainType === "solana"
-    ? "SOL"
-    : chains.find((c) => c.chain_id === chainId)?.native_symbol ?? "ETH";
-
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-2xl border-2 border-border bg-popover p-6 shadow-xl">
         <h2 className="font-semibold text-base mb-1">New fee payer</h2>
-        <p className="text-xs text-muted-foreground mb-4">A new wallet will be generated to pay gas fees for your users' transactions.</p>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Chain type</label>
-            <select
-              value={chainType}
-              onChange={(e) => {
-                setChainType(e.target.value as "evm" | "solana");
-                setChainId("");
-              }}
-              className={inputCls}
-            >
-              <option value="evm">EVM (Ethereum, Polygon, etc.)</option>
-              <option value="solana">Solana</option>
-            </select>
-          </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          A new wallet will be generated to pay gas fees for your users' transactions.
+        </p>
 
-          {chainType === "evm" && (
+        {/* Show a loader until chains are ready */}
+        {chainsLoading ? (
+          <div className="py-8 flex items-center justify-center text-sm text-muted-foreground animate-pulse">
+            Loading chains…
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Chain type */}
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Chain</label>
-              {chainsLoading ? (
-                <div className={cn(inputCls, "text-muted-foreground animate-pulse")}>Loading chains…</div>
-              ) : (
-                <select value={chainId} onChange={(e) => setChainId(e.target.value)} className={inputCls}>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Chain type</label>
+              <select
+                value={chainType}
+                onChange={(e) => setChainType(e.target.value as "evm" | "solana" | "tron")}
+                className={inputCls}
+              >
+                <option value="evm">EVM (Ethereum, Polygon, etc.)</option>
+                <option value="solana">Solana</option>
+                <option value="tron">Tron</option>
+              </select>
+            </div>
+
+            {/* Chain selector — EVM only */}
+            {chainType === "evm" && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Chain</label>
+                <select
+                  value={chainId}
+                  onChange={(e) => setChainId(e.target.value)}
+                  className={inputCls}
+                  disabled={loading}
+                >
                   {evmChains.map((c) => (
-                    <option key={c.chain_id} value={c.chain_id}>
-                      {c.name.charAt(0).toUpperCase() + c.name.slice(1)} ({c.chain_id}) — {c.native_symbol}
+                    <option key={c.chain_id} value={c.chain_id ?? ""}>
+                      {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                      {c.chain_id ? ` (${c.chain_id})` : ""} — {c.native_symbol}
+                      {c.testnet ? " [testnet]" : ""}
                     </option>
                   ))}
                 </select>
-              )}
-            </div>
-          )}
+              </div>
+            )}
 
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">
-              Low balance alert ({nativeSymbol})
-            </label>
-            <input
-              value={minBalanceAlert}
-              onChange={(e) => setMinBalanceAlert(e.target.value)}
-              placeholder="0.1"
-              type="number"
-              step="0.01"
-              min="0"
-              className={inputCls}
-            />
-            <p className="text-xs text-muted-foreground mt-1">You'll be notified when the balance drops below this threshold.</p>
+            {/* Alert threshold */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                Low balance alert ({nativeSymbol})
+              </label>
+              <input
+                value={minBalanceAlert}
+                onChange={(e) => setMinBalanceAlert(e.target.value)}
+                placeholder="0.1"
+                type="number"
+                step="0.01"
+                min="0"
+                className={inputCls}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                You'll be notified when the balance drops below this threshold.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="mt-4 rounded-lg border border-yellow-500/25 bg-yellow-500/8 p-3">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              <strong className="text-foreground">Remember to fund this wallet!</strong> After creation, send {nativeSymbol} to cover gas fees.
+              <strong className="text-foreground">Remember to fund this wallet!</strong>{" "}
+              After creation, send {nativeSymbol} to cover gas fees.
             </p>
           </div>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">Cancel</button>
-          <button onClick={submit} disabled={loading || chainsLoading} className="px-4 py-2 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={loading || chainsLoading}
+            className="px-4 py-2 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
             {loading ? "Creating…" : "Create fee payer"}
           </button>
         </div>
@@ -332,7 +381,6 @@ function CreateRelayerModal({ onClose, onCreated, orgId }: { onClose: () => void
     </div>
   );
 }
-
 function RelayersSkeleton() {
   return (
     <div className="rounded-xl border border-border overflow-hidden animate-pulse">

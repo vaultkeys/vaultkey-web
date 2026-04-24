@@ -9,7 +9,6 @@ interface ChainsCtx {
   chains: Chain[];
   chainsLoading: boolean;
   chainsError: string | null;
-  /** Call this from any page that needs chains. No-op if already loaded. */
   ensureChains: () => Promise<void>;
 }
 
@@ -28,29 +27,23 @@ export function ChainsProvider({ children }: { children: React.ReactNode }) {
   const [chainsLoading, setChainsLoading] = useState(false);
   const [chainsError, setChainsError] = useState<string | null>(null);
 
-  // Track the env for which chains are currently loaded.
-  // This lets us detect a stale cache after an env switch.
   const loadedEnvRef = useRef<string | null>(null);
-
-  // Guard against concurrent fetches: if a fetch is already in-flight,
-  // additional ensureChains() calls should wait for it rather than fire again.
   const fetchingRef = useRef(false);
   const pendingRef = useRef<Array<() => void>>([]);
+  const chainsLoadedRef = useRef(false);
 
-  // When the environment switches, invalidate the cache.
   useEffect(() => {
     setChains([]);
     setChainsError(null);
     loadedEnvRef.current = null;
+    chainsLoadedRef.current = false;
     fetchingRef.current = false;
     pendingRef.current = [];
   }, [env]);
 
   const ensureChains = useCallback(async () => {
-    // Already loaded for this env — nothing to do.
-    if (loadedEnvRef.current === env && chains.length > 0) return;
+    if (loadedEnvRef.current === env && chainsLoadedRef.current) return;
 
-    // A fetch is already in-flight — queue up and wait for it to resolve.
     if (fetchingRef.current) {
       return new Promise<void>((resolve) => {
         pendingRef.current.push(resolve);
@@ -73,20 +66,22 @@ export function ChainsProvider({ children }: { children: React.ReactNode }) {
       const api = makeCloud(baseUrl);
       const res = await api.getChains(token);
 
-      setChains(res.chains);
+      const incoming = Array.isArray(res) ? res : [];
+      setChains(incoming);
+      chainsLoadedRef.current = incoming.length > 0;
       loadedEnvRef.current = env;
       setChainsError(null);
     } catch (e: any) {
-      // Don't cache a failed result so the next caller can retry.
       setChainsError(e.message ?? "Failed to load chains");
       setChains([]);
+      chainsLoadedRef.current = false;
       loadedEnvRef.current = null;
     } finally {
       fetchingRef.current = false;
       setChainsLoading(false);
       resolvePending();
     }
-  }, [env, baseUrl, getToken, chains.length]);
+  }, [env, baseUrl, getToken]);
 
   return (
     <ChainsContext.Provider value={{ chains, chainsLoading, chainsError, ensureChains }}>
