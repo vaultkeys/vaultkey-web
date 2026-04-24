@@ -87,6 +87,10 @@ export interface RelayerLiveInfo {
   healthy: boolean;      // balance >= hardcoded floor (0.05 ETH / 0.05 SOL)
   min_balance_alert: string;   // user-configured threshold as decimal string
   alert_triggered: boolean;    // balance < min_balance_alert
+
+  // Tron-only (present when chain_type === "tron")
+  trx_balance_sun?: number;
+  available_energy?: number;
 }
 
 export interface MasterWallet {
