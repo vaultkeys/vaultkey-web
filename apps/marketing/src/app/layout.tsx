@@ -21,17 +21,17 @@ export const metadata: Metadata = {
   description:
     "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
-  metadataBase: new URL("https://vaultkey.dev"),
+  metadataBase: new URL("https://getvaultkey.com"),
   openGraph: {
     title: "VaultKey – programmable wallet infrastructure",
     description:
       "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins. Pay only for what you use.",
-    url: "https://vaultkey.dev",
+    url: "https://getvaultkey.com",
     siteName: "VaultKey",
     images: [
       {
         // Replace with actual OG image when available
-        url: "https://vaultkey.dev/og.png",
+        url: "https://getvaultkey.com/og.png",
         width: 1200,
         height: 630,
         alt: "VaultKey – programmable wallet infrastructure",
@@ -46,14 +46,14 @@ export const metadata: Metadata = {
     title: "VaultKey – programmable wallet infrastructure",
     description:
       "Create and manage EVM and Solana wallets, sign transactions, and send stablecoins.",
-    images: ["https://vaultkey.dev/og.png"],
+    images: ["https://getvaultkey.com/og.png"],
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://vaultkey.dev",
+    canonical: "https://getvaultkey.com",
   },
 };
 

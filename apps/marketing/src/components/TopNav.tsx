@@ -8,8 +8,8 @@ import { Button } from "@vaultkey/ui/src/button";
 
 const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
-const APP_URL = "https://app.vaultkey.dev";
-const DOCS_URL = "https://docs.vaultkey.dev";
+const APP_URL = "https://app.getvaultkey.com";
+const DOCS_URL = "https://docs.getvaultkey.com";
 
 export function TopNav() {
   const [open, setOpen] = useState(false);

@@ -1,17 +1,17 @@
 <p align="center">
-  <img style="width: 200px;height: 200px; margin: auto;" src="https://vaultkeys.dev/logo-squircle.png" alt="VaultKey Logo">
+  <img style="width: 200px;height: 200px; margin: auto;" src="https://getvaultkey.com/logo-squircle.png" alt="VaultKey Logo">
 </p>
 
 <p align="center" style="margin-top: 20px">
   <p align="center">
   Open source wallet infrastructure for developers.
   <br>
-    <a href="https://vaultkeys.dev"><strong>Learn more »</strong></a>
+    <a href="https://getvaultkey.com"><strong>Learn more »</strong></a>
     <br />
     <br />
-    <a href="https://vaultkeys.dev">Website</a>
+    <a href="https://getvaultkey.com">Website</a>
     ·
-    <a href="https://docs.vaultkeys.dev">Docs</a>
+    <a href="https://docs.getvaultkey.com">Docs</a>
     ·
     <a href="https://github.com/vaultkeys/vaultkey-web">Issues</a>
   </p>
@@ -121,7 +121,7 @@ job, err = vk.stablecoin.transfer(wallet["id"], {
 })
 ```
 
-Full SDK docs at [docs.vaultkeys.dev](https://docs.vaultkeys.dev).
+Full SDK docs at [docs.getvaultkey.com](https://docs.getvaultkey.com).
 
 ## Community and Next Steps 🎯
 

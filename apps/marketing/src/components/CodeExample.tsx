@@ -104,14 +104,14 @@ func main() {
 }`;
 
 const CURL_CODE = `# Create a wallet
-curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets \
+curl -X POST https://app.getvaultkey.com/api/v1/sdk/wallets \
   -H "X-API-Key: vk_live_your_api_key" \
   -H "X-API-Secret: your_api_secret" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"user_123","chain_type":"evm","label":"main"}'
 
 # Send USDC on Polygon
-curl -X POST https://app.vaultkeys.dev/api/v1/sdk/wallets/{walletId}/stablecoin/transfer/evm \
+curl -X POST https://app.getvaultkey.com/api/v1/sdk/wallets/{walletId}/stablecoin/transfer/evm \
   -H "X-API-Key: vk_live_your_api_key" \
   -H "X-API-Secret: your_api_secret" \
   -H "Content-Type: application/json" \
@@ -209,7 +209,7 @@ export function CodeExample() {
         <div className="mt-6 flex items-center justify-center gap-3">
           <Button size="lg" className="px-6">
             <a
-              href="https://docs.vaultkeys.dev"
+              href="https://docs.getvaultkey.com"
               target="_blank"
               rel="noopener noreferrer"
             >

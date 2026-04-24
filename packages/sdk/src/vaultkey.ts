@@ -38,8 +38,8 @@ export interface VaultKeyConfig {
    * Falls back to the VAULTKEY_API_KEY environment variable.
    *
    * The SDK automatically routes requests to the correct endpoint:
-   * - `testnet_` → https://testnet.vaultkeys.dev
-   * - `vk_live_` → https://app.vaultkeys.dev
+   * - `testnet_` → https://testnet.getvaultkey.com
+   * - `vk_live_` → https://app.getvaultkey.com
    */
   apiKey?: string;
 

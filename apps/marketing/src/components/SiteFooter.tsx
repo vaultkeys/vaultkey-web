@@ -3,8 +3,8 @@ import Image from "next/image";
 
 const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
-const APP_URL = "https://app.vaultkey.dev";
-const DOCS_URL = "https://docs.vaultkey.dev";
+const APP_URL = "https://app.getvaultkey.com";
+const DOCS_URL = "https://docs.getvaultkey.com";
 
 export function SiteFooter() {
   return (
@@ -63,7 +63,7 @@ export function SiteFooter() {
                 <ul className="space-y-2 text-muted-foreground">
                   <li>
                     <a
-                      href="mailto:hey@vaultkey.dev"
+                      href="mailto:hey@getvaultkey.com"
                       className="hover:text-foreground text-xs"
                     >
                       Email
@@ -119,7 +119,7 @@ export function SiteFooter() {
 
             {/* Replace with VaultKey status page URL when available */}
             <a
-              href="https://status.vaultkey.dev"
+              href="https://status.getvaultkey.com"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Service status"

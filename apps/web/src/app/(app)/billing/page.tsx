@@ -656,7 +656,7 @@ function BusinessCard() {
         Unlimited calls · dedicated nodes · custom SLAs
       </p>
       <a
-        href="mailto:sales@vaultkey.dev"
+        href="mailto:sales@getvaultkey.com"
         className="mt-auto w-full rounded-md px-3 py-2 text-xs font-medium border border-border hover:bg-accent text-foreground text-center transition-colors flex items-center justify-center gap-1.5"
       >
         Contact sales <ArrowUpRight className="h-3 w-3" />

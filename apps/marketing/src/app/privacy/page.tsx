@@ -17,14 +17,14 @@ export default function PrivacyPage() {
         <p className="text-muted-foreground mb-8">
           This Privacy Policy explains how VaultKey ("we", "us") collects,
           uses, and shares information when you visit our marketing website at
-          vaultkeys.dev, access our API, or use our wallet infrastructure
+          getvaultkey.com, access our API, or use our wallet infrastructure
           platform. Please read this policy carefully. If you have questions,
           contact us at{" "}
           <a
-            href="mailto:info@vaultkeys.dev"
+            href="mailto:info@getvaultkey.com"
             className="underline decoration-dotted"
           >
-            info@vaultkeys.dev
+            info@getvaultkey.com
           </a>
           .
         </p>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-medium">Who We Are</h2>
           <p className="text-muted-foreground">
             VaultKey operates the website at{" "}
-            <span className="font-mono">vaultkeys.dev</span> and the VaultKey
+            <span className="font-mono">getvaultkey.com</span> and the VaultKey
             API platform, which provides wallet infrastructure,
             signing services, and stablecoin transfer capabilities to
             developers and businesses. We are the data controller for the
@@ -212,10 +212,10 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground">
             For privacy requests or questions, email us at{" "}
             <a
-              href="mailto:info@vaultkeys.dev"
+              href="mailto:info@getvaultkey.com"
               className="underline decoration-dotted"
             >
-              info@vaultkeys.dev
+              info@getvaultkey.com
             </a>
             .
           </p>

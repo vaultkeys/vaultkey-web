@@ -8,8 +8,8 @@ import { FeatureCardPlain } from "~/components/FeatureCardPlain";
 import { PricingCalculator } from "~/components/PricingCalculator";
 import CodeExample from "~/components/CodeExample";
 
-const APP_URL = "https://app.vaultkey.dev";
-const DOCS_URL = "https://docs.vaultkey.dev";
+const APP_URL = "https://app.getvaultkey.com";
+const DOCS_URL = "https://docs.getvaultkey.com";
 const REPO = "vaultkeys/vaultkey-web";
 const REPO_URL = `https://github.com/${REPO}`;
 

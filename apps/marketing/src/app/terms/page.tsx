@@ -16,7 +16,7 @@ export default function TermsPage() {
         </h1>
         <p className="text-muted-foreground mb-6">
           These Terms of Service ("Terms") govern your access to and use of the
-          VaultKey website at vaultkeys.dev and the VaultKey API platform,
+          VaultKey website at getvaultkey.com and the VaultKey API platform,
           which provides custodial wallet infrastructure, signing, sweep, and
           stablecoin transfer services. By accessing or using our site or
           platform, you agree to be bound by these Terms.
@@ -217,10 +217,10 @@ export default function TermsPage() {
           <p className="text-muted-foreground">
             Questions about these Terms? Contact us at{" "}
             <a
-              href="mailto:info@vaultkeys.dev"
+              href="mailto:info@getvaultkey.com"
               className="underline decoration-dotted"
             >
-              info@vaultkeys.dev
+              info@getvaultkey.com
             </a>
             .
           </p>
