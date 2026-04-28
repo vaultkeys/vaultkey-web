@@ -91,6 +91,23 @@ export interface RelayerLiveInfo {
   // Tron-only (present when chain_type === "tron")
   trx_balance_sun?: number;
   available_energy?: number;
+  total_energy_limit?: number;
+  energy_used_today?: number;
+  staked_for_energy_trx?: string;
+  staked_for_bandwidth_trx?: string;
+  estimated_transactions_remaining?: number;
+  energy_alert_triggered?: boolean;
+}
+
+export interface TronStakingInfo {
+  total_energy_limit: number;
+  energy_used_today: number;
+  available_energy: number;
+  staked_for_energy_trx: string;      // decimal string e.g. "6000.000000"
+  staked_for_bandwidth_trx: string;
+  estimated_transactions_remaining: number;
+  energy_alert_triggered: boolean;
+  min_energy_alert: number;
 }
 
 export interface MasterWallet {
@@ -279,6 +296,25 @@ export function makeCloud(baseUrl: string) {
 
     updateRelayer: (token: string, orgId: string, relayerId: string, body: { min_balance_alert: string }) =>
       req<Relayer>(baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}`, { method: "PATCH", body: JSON.stringify(body), token }),
+
+    // Tron staking — add after updateRelayer
+    stakeTRX: (token: string, orgId: string, relayerId: string, body: { amount_trx: string; resource: "ENERGY" | "BANDWIDTH" }) =>
+      req<{ tx_id: string; amount_trx: string; staked_sun: number; resource: string; status: string }>(
+        baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}/stake`,
+        { method: "POST", body: JSON.stringify(body), token },
+      ),
+
+    unstakeTRX: (token: string, orgId: string, relayerId: string, body: { amount_trx: string; resource: "ENERGY" | "BANDWIDTH" }) =>
+      req<{ tx_id: string; amount_trx: string; resource: string; lock_period_days: number; warning: string }>(
+        baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}/unstake`,
+        { method: "POST", body: JSON.stringify(body), token },
+      ),
+
+    withdrawStake: (token: string, orgId: string, relayerId: string) =>
+      req<{ tx_id: string; withdrawn_sun: number; withdrawn_trx: string }>(
+        baseUrl, `/cloud/organizations/${orgId}/relayers/${relayerId}/stake/withdraw`,
+        { method: "POST", token },
+      ),
 
     provisionMasterWallet: (
       token: string,

@@ -69,7 +69,7 @@ function Hero() {
         </div>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Free testnet tier
+          Free sandbox tier
         </p>
 
         <div className="mt-32 mx-auto max-w-5xl">
@@ -133,7 +133,7 @@ function TrustedBy() {
         "https://pbs.twimg.com/profile_images/1698447401781022720/b0DZSc_D_400x400.jpg",
     },
     {
-      quote: "The testnet isolation is a killer feature for staging environments.",
+      quote: "The sandbox isolation is a killer feature for staging environments.",
       author: "Andras Bacsai",
       company: "coolify.io",
       image:
@@ -261,7 +261,7 @@ function Features() {
       key: "feature-multitenancy",
       title: "Multi-tenant & RBAC",
       content:
-        "Full organization model with owner, admin, developer, and viewer roles. Separate mainnet and testnet environments with isolated orgs, API keys, and credit balances.",
+        "Full organization model with owner, admin, developer, and viewer roles. Separate mainnet and sandbox environments with isolated orgs, API keys, and credit balances.",
     },
   ];
 

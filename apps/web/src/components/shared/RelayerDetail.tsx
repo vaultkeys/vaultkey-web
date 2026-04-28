@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   RefreshCw, Pencil, Check, X, AlertTriangle,
-  ShieldCheck, ShieldAlert, WifiOff, Trash2, Info,
+  ShieldCheck, ShieldAlert, WifiOff, Trash2, Info, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { type Relayer, type RelayerLiveInfo } from "@/lib/api";
@@ -12,6 +12,7 @@ import { useApi } from "@/hooks/useApi";
 import { useChains } from "@/hooks/useChains";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { StatusBadgeBoolean } from "@/components/shared/StatusBadge";
+import { TronStakingPanel } from "@/components/shared/TronStakingPanel";
 import ChainBadge from "@/components/shared/ChainBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@vaultkey/ui/src/dialog";
 import { formatRelayerBalance } from "@/lib/utils";
@@ -26,6 +27,21 @@ interface RelayerDetailProps {
   onDeactivated?: (relayerId: string) => void;
   /** Called after min_balance_alert is updated. */
   onUpdated?: (relayer: Relayer) => void;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Derive the native symbol for a relayer without needing the chain registry
+ *  for Solana and Tron (which have no chain_id to look up). */
+function nativeSymbolForRelayer(relayer: Relayer, chains: { chain_id?: string; native_symbol: string }[]): string {
+  if (relayer.chain_type === "solana") return "SOL";
+  if (relayer.chain_type === "tron") return "TRX";
+  return chains.find((c) => c.chain_id === relayer.chain_id)?.native_symbol ?? "ETH";
+}
+
+/** Format a raw energy number for display, e.g. 1_234_567 → "1,234,567". */
+function formatEnergy(energy: number): string {
+  return energy.toLocaleString("en-US");
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -49,10 +65,7 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
   const [deactivating, setDeactivating] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Derive native symbol from chain registry for display.
-  const nativeSymbol = relayer.chain_type === "solana"
-    ? "SOL"
-    : chains.find((c) => c.chain_id === relayer.chain_id)?.native_symbol ?? "ETH";
+  const nativeSymbol = nativeSymbolForRelayer(relayer, chains);
 
   // ── Live balance fetch ──────────────────────────────────────────────────────
 
@@ -65,7 +78,6 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
       const info = await cloud.getRelayerLiveInfo(token, orgId, relayer.id);
       setLiveInfo(info);
     } catch (e: any) {
-      // 502 = RPC unreachable, anything else is unexpected.
       const msg = e.status === 502
         ? "Balance unavailable — RPC node unreachable"
         : (e.message ?? "Failed to fetch balance");
@@ -83,7 +95,6 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
 
   const saveAlert = async () => {
     const trimmed = alertDraft.trim();
-    // Basic client-side validation before hitting the API.
     const parsed = parseFloat(trimmed);
     if (!trimmed || isNaN(parsed) || parsed < 0) {
       toast.error("Enter a valid non-negative number (e.g. 0.1)");
@@ -218,17 +229,40 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
                 <span className="text-lg text-muted-foreground ml-2">{formattedBalance.symbol}</span>
               </p>
               <p className="text-xs text-muted-foreground mt-1 font-mono">
-                {liveInfo.balance} {liveInfo.unit}
+                {/* For tron show raw SUN; for others show balance + unit as-is */}
+                {relayer.chain_type === "tron" && liveInfo.trx_balance_sun != null
+                  ? `${liveInfo.trx_balance_sun.toLocaleString("en-US")} SUN`
+                  : `${liveInfo.balance} ${liveInfo.unit}`
+                }
               </p>
             </div>
+
+            {/* Tron: available energy row */}
+            {relayer.chain_type === "tron" && liveInfo.available_energy != null && (
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-3 py-2">
+                <Zap className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Available energy:{" "}
+                  <span className="font-mono text-foreground">
+                    {formatEnergy(liveInfo.available_energy)}
+                  </span>
+                  {" "}units
+                </p>
+              </div>
+            )}
 
             {/* Health indicators */}
             <div className="space-y-2">
               <HealthRow
                 healthy={liveInfo.healthy}
                 label={liveInfo.healthy
-                  ? "Above minimum operating balance"
-                  : "Below minimum operating balance (0.05 " + nativeSymbol + ")"}
+                  ? relayer.chain_type === "tron"
+                    ? "Sufficient energy for relaying"
+                    : "Above minimum operating balance"
+                  : relayer.chain_type === "tron"
+                    ? "Insufficient energy — top up TRX or delegate more energy"
+                    : "Below minimum operating balance"
+                }
               />
               {liveInfo.alert_triggered && (
                 <div className="flex items-start gap-2 rounded-md border border-yellow-500/25 bg-yellow-500/8 px-3 py-2">
@@ -246,6 +280,16 @@ export function RelayerDetail({ relayer, orgId, onDeactivated, onUpdated }: Rela
           </div>
         ) : null}
       </div>
+
+      {/* Tron energy management — only shown for Tron relayers with live data */}
+      {relayer.chain_type === "tron" && liveInfo && !liveError && (
+        <TronStakingPanel
+          relayerId={relayer.id}
+          orgId={orgId}
+          liveInfo={liveInfo}
+          onActionComplete={fetchLiveInfo}
+        />
+      )}
 
       {/* Configuration card */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
